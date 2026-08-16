@@ -1,0 +1,595 @@
+// Watchlist database schema
+// SQLite for local development; DATABASE_URL can point at Postgres in production
+// without changing application code (Prisma abstracts the dialect).
+//
+// NOTE: SQLite has no native enum type, so status/type fields below are
+// plain String columns validated by TS union types in src/lib/constants.ts.
+// Switching DATABASE_URL to Postgres later can reintroduce native enums
+// without any application-code changes.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile Profile?
+
+  userShows   UserShow[]
+  userMovies  UserMovie[]
+  episodeWatches EpisodeWatch[]
+  movieWatches   MovieWatch[]
+  ratings     Rating[]
+  reactions   Reaction[]
+  favorites   Favorite[]
+  lists       CustomList[]
+  userBadges  UserBadge[]
+  notifications Notification[]
+  importJobs  ImportJob[]
+  dailyActivity DailyWatchActivity[]
+
+  @@index([username])
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName String?
+  bio       String?
+  avatarUrl String?
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Reference / taxonomy
+// ---------------------------------------------------------------------------
+
+model Genre {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  showGenres  ShowGenre[]
+  movieGenres MovieGenre[]
+}
+
+model Network {
+  id     String @id @default(cuid())
+  name   String @unique
+  slug   String @unique
+  logoUrl String?
+
+  shows Show[]
+}
+
+model Person {
+  id        String  @id @default(cuid())
+  name      String
+  slug      String  @unique
+  imageUrl  String?
+  bio       String?
+
+  showCast    ShowCast[]
+  movieCast   MovieCast[]
+  episodeCast EpisodeCast[]
+  externalIds ExternalId[]
+
+  @@index([name])
+}
+
+model Character {
+  id   String @id @default(cuid())
+  name String
+
+  showCharacters ShowCharacter[]
+  showCast       ShowCast[]
+  movieCast      MovieCast[]
+  episodeCast    EpisodeCast[]
+
+  @@index([name])
+}
+
+// ---------------------------------------------------------------------------
+// Shows
+// ---------------------------------------------------------------------------
+
+// status: RETURNING | ENDED | CANCELLED | IN_PRODUCTION | PLANNED
+model Show {
+  id            String     @id @default(cuid())
+  title         String
+  originalTitle String?
+  slug          String     @unique
+  description   String?
+  status        String     @default("RETURNING")
+  firstAirDate  DateTime?
+  lastAirDate   DateTime?
+  episodeRuntime Int?      // minutes, typical episode length
+  language      String?
+  country       String?
+  posterUrl     String?
+  backdropUrl   String?
+  popularity    Float      @default(0)
+  voteAverage   Float?
+  networkId     String?
+  network       Network?   @relation(fields: [networkId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  seasons     Season[]
+  episodes    Episode[]
+  genres      ShowGenre[]
+  cast        ShowCast[]
+  characters  ShowCharacter[]
+  externalIds ExternalId[]
+  userShows   UserShow[]
+  listItems   CustomListItem[]
+  favorites   Favorite[]
+
+  @@index([title])
+  @@index([slug])
+}
+
+model Season {
+  id           String   @id @default(cuid())
+  showId       String
+  show         Show     @relation(fields: [showId], references: [id], onDelete: Cascade)
+  seasonNumber Int
+  title        String?
+  overview     String?
+  posterUrl    String?
+  airDate      DateTime?
+
+  episodes Episode[]
+
+  @@unique([showId, seasonNumber])
+  @@index([showId])
+}
+
+model Episode {
+  id            String   @id @default(cuid())
+  seasonId      String
+  season        Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  showId        String
+  show          Show     @relation(fields: [showId], references: [id], onDelete: Cascade)
+  episodeNumber Int
+  title         String
+  overview      String?
+  airDate       DateTime?
+  runtime       Int?     // minutes
+  imageUrl      String?
+  voteAverage   Float?
+
+  cast        EpisodeCast[]
+  watches     EpisodeWatch[]
+  ratings     Rating[]
+  reactions   Reaction[]
+
+  @@unique([seasonId, episodeNumber])
+  @@index([showId])
+}
+
+model ShowGenre {
+  showId  String
+  genreId String
+  show    Show  @relation(fields: [showId], references: [id], onDelete: Cascade)
+  genre   Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([showId, genreId])
+}
+
+model ShowCast {
+  id          String     @id @default(cuid())
+  showId      String
+  show        Show       @relation(fields: [showId], references: [id], onDelete: Cascade)
+  personId    String
+  person      Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+  characterId String?
+  character   Character? @relation(fields: [characterId], references: [id])
+  role        String     @default("actor") // actor | creator | director | writer
+  billingOrder Int?
+
+  @@index([showId])
+  @@index([personId])
+}
+
+model ShowCharacter {
+  id          String    @id @default(cuid())
+  showId      String
+  show        Show      @relation(fields: [showId], references: [id], onDelete: Cascade)
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@unique([showId, characterId])
+}
+
+model EpisodeCast {
+  id          String     @id @default(cuid())
+  episodeId   String
+  episode     Episode    @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  personId    String
+  person      Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+  characterId String?
+  character   Character? @relation(fields: [characterId], references: [id])
+
+  @@index([episodeId])
+}
+
+// ---------------------------------------------------------------------------
+// Movies
+// ---------------------------------------------------------------------------
+
+model Movie {
+  id            String    @id @default(cuid())
+  title         String
+  originalTitle String?
+  slug          String    @unique
+  synopsis      String?
+  releaseDate   DateTime?
+  runtime       Int?      // minutes
+  language      String?
+  country       String?
+  posterUrl     String?
+  backdropUrl   String?
+  popularity    Float     @default(0)
+  voteAverage   Float?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  genres      MovieGenre[]
+  cast        MovieCast[]
+  externalIds ExternalId[]
+  userMovies  UserMovie[]
+  watches     MovieWatch[]
+  ratings     Rating[]
+  reactions   Reaction[]
+  listItems   CustomListItem[]
+  favorites   Favorite[]
+
+  @@index([title])
+  @@index([slug])
+}
+
+model MovieGenre {
+  movieId String
+  genreId String
+  movie   Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genre   Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, genreId])
+}
+
+model MovieCast {
+  id          String     @id @default(cuid())
+  movieId     String
+  movie       Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  personId    String
+  person      Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+  characterId String?
+  character   Character? @relation(fields: [characterId], references: [id])
+  role        String     @default("actor") // actor | director | writer
+  billingOrder Int?
+
+  @@index([movieId])
+  @@index([personId])
+}
+
+// ---------------------------------------------------------------------------
+// User tracking state
+// ---------------------------------------------------------------------------
+
+// status: PLANNED | WATCHING | PAUSED | COMPLETED | DROPPED
+model UserShow {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  showId    String
+  show      Show        @relation(fields: [showId], references: [id], onDelete: Cascade)
+  status    String      @default("PLANNED")
+  addedAt   DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([userId, showId])
+  @@index([userId, status])
+}
+
+model UserMovie {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId   String
+  movie     Movie       @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  status    String      @default("PLANNED")
+  addedAt   DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([userId, movieId])
+  @@index([userId, status])
+}
+
+// Event-sourced watch history. "Currently watched" state is derived from
+// the presence of at least one event, which also makes rewatches and
+// imported historical dates first-class instead of a boolean flag.
+model EpisodeWatch {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episodeId    String
+  episode      Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  watchedAt    DateTime
+  source       String   @default("manual") // manual | import | api | seed
+  importedFrom String?
+  dedupeKey    String   // stable hash for idempotent imports
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, episodeId])
+  @@index([userId, watchedAt])
+}
+
+model MovieWatch {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId      String
+  movie        Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  watchedAt    DateTime
+  source       String   @default("manual")
+  importedFrom String?
+  dedupeKey    String
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, movieId])
+  @@index([userId, watchedAt])
+}
+
+// Materialized per-day rollup that backs the profile contribution heatmap
+// and statistics screens without re-scanning WatchEvent history each time.
+// Always derivable from EpisodeWatch/MovieWatch — never a source of truth.
+model DailyWatchActivity {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          String   // YYYY-MM-DD in the user's timezone
+  episodeCount  Int      @default(0)
+  movieCount    Int      @default(0)
+  totalMinutes  Int      @default(0)
+  activityScore Int      @default(0) // 0-4 bucket for heatmap intensity
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+// targetType: SHOW | SEASON | EPISODE | MOVIE
+model Rating {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String
+  showId    String?
+  episodeId String?
+  episode   Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  movieId   String?
+  movie     Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  score     Int      // 1-10
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, targetType, showId, episodeId, movieId])
+  @@index([userId])
+}
+
+// type: LOVE | LIKE | MEH | DISLIKE | MIND_BLOWN | FUNNY | SAD | SCARY
+model Reaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  episodeId String?
+  episode   Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  movieId   String?
+  movie     Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// targetType: SHOW | MOVIE
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String
+  showId    String?
+  show      Show?    @relation(fields: [showId], references: [id], onDelete: Cascade)
+  movieId   String?
+  movie     Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, targetType, showId, movieId])
+  @@index([userId])
+}
+
+model CustomList {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items CustomListItem[]
+
+  @@index([userId])
+}
+
+model CustomListItem {
+  id        String   @id @default(cuid())
+  listId    String
+  list      CustomList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  showId    String?
+  show      Show?    @relation(fields: [showId], references: [id], onDelete: Cascade)
+  movieId   String?
+  movie     Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  position  Int      @default(0)
+  addedAt   DateTime @default(now())
+
+  @@unique([listId, showId, movieId])
+  @@index([listId])
+}
+
+// ---------------------------------------------------------------------------
+// Badges (rules engine — see src/lib/badges/*)
+// ---------------------------------------------------------------------------
+
+model Badge {
+  id          String   @id @default(cuid())
+  key         String   @unique // stable machine key referenced by the rules engine
+  name        String
+  description String
+  category    String   // discovery | consistency | completion | binge | movie_buff | explorer | collector
+  tier        Int      @default(1)
+  iconKey     String   // maps to a bundled SVG icon, never user-uploaded
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  earnedAt  DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+// type: UPCOMING_EPISODE | NEW_EPISODE | IMPORT_COMPLETE | IMPORT_NEEDS_ATTENTION | BADGE_EARNED | RECOMMENDATION
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+}
+
+// ---------------------------------------------------------------------------
+// External metadata IDs (provider migration support)
+// ---------------------------------------------------------------------------
+
+// entityType: SHOW | MOVIE | PERSON | EPISODE
+model ExternalId {
+  id         String @id @default(cuid())
+  entityType String
+  provider   String // e.g. "tmdb" | "imdb" | "tvdb" | "local"
+  externalId String
+
+  showId   String?
+  show     Show?   @relation(fields: [showId], references: [id], onDelete: Cascade)
+  movieId  String?
+  movie    Movie?  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  personId String?
+  person   Person? @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, entityType, externalId])
+  @@index([showId])
+  @@index([movieId])
+  @@index([personId])
+}
+
+// ---------------------------------------------------------------------------
+// Import pipeline
+// ---------------------------------------------------------------------------
+
+// status: PENDING | VALIDATING | EXTRACTING | MAPPING | MATCHING | NEEDS_REVIEW | IMPORTING | COMPLETED | FAILED | CANCELLED
+model ImportJob {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceName   String
+  sourceKind   String   // "zip" | "csv"
+  status       String   @default("PENDING")
+  stage        String?
+  processedRows Int     @default(0)
+  matchedRows   Int     @default(0)
+  ambiguousRows Int     @default(0)
+  unmatchedRows Int     @default(0)
+  duplicateRows Int     @default(0)
+  errorRows     Int     @default(0)
+  summary      String?  // JSON blob with the final report
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  files ImportFile[]
+  rows  ImportRow[]
+
+  @@index([userId])
+}
+
+model ImportFile {
+  id         String    @id @default(cuid())
+  importJobId String
+  importJob  ImportJob @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  filename   String
+  detectedKind String? // "shows" | "movies" | "episodes" | "ratings" | "unknown"
+  rowCount   Int       @default(0)
+  headers    String?   // JSON array of detected headers
+
+  rows ImportRow[]
+
+  @@index([importJobId])
+}
+
+// status: PENDING | MATCHED | AMBIGUOUS | UNMATCHED | DUPLICATE | ERROR | RESOLVED | SKIPPED
+model ImportRow {
+  id           String   @id @default(cuid())
+  importJobId  String
+  importJob    ImportJob  @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  importFileId String
+  importFile   ImportFile @relation(fields: [importFileId], references: [id], onDelete: Cascade)
+  rowNumber    Int
+  rawData      String   // JSON of the original row, preserved verbatim
+  status       String   @default("PENDING")
+  candidates   String?  // JSON array of candidate matches for review
+  resolution   String?  // JSON of the chosen resolution
+  errorMessage String?
+  createdAt    DateTime @default(now())
+
+  @@index([importJobId, status])
+  @@index([importFileId])
+}
