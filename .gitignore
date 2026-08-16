@@ -1,14 +1,41 @@
-node_modules
-.next
-out
-dist
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+dist/
+.vercel/
+
+# environment
 .env
 .env.local
+.env.*.local
+
+# Prisma / local database
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# testing
+coverage/
+
+# logs
 *.log
-/prisma/dev.db
-/prisma/dev.db-journal
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# misc
 /tmp
 /uploads
-coverage
-.DS_Store
 *.tsbuildinfo
