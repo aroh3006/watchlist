@@ -1,18 +1,19 @@
 // Watchlist database schema
-// SQLite for local development; DATABASE_URL can point at Postgres in production
-// without changing application code (Prisma abstracts the dialect).
+// Postgres (Neon) in production; see README for local dev setup.
 //
-// NOTE: SQLite has no native enum type, so status/type fields below are
-// plain String columns validated by TS union types in src/lib/constants.ts.
-// Switching DATABASE_URL to Postgres later can reintroduce native enums
-// without any application-code changes.
+// NOTE: status/type fields below are plain String columns validated by TS
+// union types in src/lib/constants.ts rather than native Prisma enums — this
+// was deliberate so the app could start on SQLite (no native enum support)
+// and move to Postgres later without touching call sites. Prisma's
+// `datasource.provider` is fixed per schema file, though, so unlike the
+// connection URL, switching dialects does require this one edit.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
