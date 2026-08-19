@@ -5,9 +5,6 @@ discontinued TV Time experience. It recreates the tracking workflows, statistics
 experience, and import capabilities that made TV Time useful, with its own branding, visual
 design, and data architecture.
 
-Built to run **entirely locally** for now. Deployment (GitHub Pages / hosting) is a deliberately
-separate, later step. See [Deployment](#deployment-later-not-yet-configured) below.
-
 ## What's implemented
 
 - **Tracking**: follow shows/movies, mark episodes/seasons/whole shows watched (one click),
@@ -206,20 +203,6 @@ timezone-aware date-keying, streak math (including the "watched yesterday, strea
 case), badge rule evaluation, CSV export formula-injection sanitization, and an integration suite
 against the real Prisma/SQLite client verifying that marking a show watched twice doesn't
 duplicate watch events.
-
-## Deployment (later, not yet configured)
-
-The eventual target is GitHub Pages, which is static-only — it cannot run Prisma/API routes as-is.
-The codebase is already structured for a clean split when that's requested:
-
-- **Static frontend**: the Next.js UI could be exported statically.
-- **API/data services**: the API routes (`src/app/api/**`) and Prisma layer would move behind a
-  separately-hosted service (or serverless functions on a platform that supports them).
-- **Metadata provider boundary**: already provider-agnostic (see above) — swapping to TMDB or a
-  licensed dataset for production requires no application rewrite.
-
-**Nothing has been pushed or deployed.** This repo is local-only until explicitly asked to move to
-GitHub Pages.
 
 ## Known limitations / next steps
 
