@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { PlusIcon, CheckCircleIcon } from "./icons";
+import { SafeImage } from "./SafeImage";
 
 export function DiscoverCard({
   title,
@@ -39,12 +40,7 @@ export function DiscoverCard({
     <div className="w-[140px] sm:w-[160px] shrink-0">
       <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-bg-overlay border border-border-subtle">
         <Link href={openHref} className="block w-full h-full focus-ring" aria-label={`Open ${title}`}>
-          {posterUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={posterUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full skeleton" />
-          )}
+          <SafeImage src={posterUrl} seed={openHref} title={title} kind="poster" loading="lazy" className="w-full h-full object-cover" />
         </Link>
         <button
           onClick={add}

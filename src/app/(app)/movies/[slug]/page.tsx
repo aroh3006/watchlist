@@ -6,6 +6,7 @@ import { AddToListButton } from "@/components/AddToListButton";
 import { BackButton } from "@/components/BackButton";
 import { ReactionBar } from "@/components/ReactionBar";
 import { PosterRow, PosterCard } from "@/components/PosterCard";
+import { SafeImage } from "@/components/SafeImage";
 import { Section } from "@/components/Section";
 import type { ReactionType } from "@/lib/constants";
 
@@ -41,20 +42,14 @@ export default async function MovieDetailPage({ params }: { params: { slug: stri
   return (
     <div>
       <div className="relative h-56 md:h-72 w-full overflow-hidden">
-        {movie.backdropUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={movie.backdropUrl} alt="" className="w-full h-full object-cover" />
-        )}
+        <SafeImage src={movie.backdropUrl} seed={movie.id} title={movie.title} kind="backdrop" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/60 to-transparent" />
         <BackButton className="absolute top-3 left-3 md:top-4 md:left-4" />
       </div>
 
       <div className="px-4 md:px-8 -mt-16 relative flex flex-col md:flex-row gap-6">
         <div className="w-32 md:w-48 shrink-0 rounded-xl2 overflow-hidden border border-border shadow-card">
-          {movie.posterUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={movie.posterUrl} alt="" className="w-full h-full object-cover" />
-          )}
+          <SafeImage src={movie.posterUrl} seed={movie.id} title={movie.title} kind="poster" className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0 pt-2 md:pt-16">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{movie.title}</h1>

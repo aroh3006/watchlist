@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { CheckCircleIcon } from "./icons";
+import { SafeImage } from "./SafeImage";
 
 export interface EpisodeRowData {
   id: string;
@@ -127,10 +128,7 @@ function EpisodeRow({
     <li className="relative flex gap-3 p-3 hover:bg-bg-overlay/60 transition-colors items-center">
       <Link href={`/shows/${showSlug}/episodes/${ep.id}`} className="flex gap-3 flex-1 min-w-0 focus-ring rounded-lg">
         <div className="w-20 h-12 rounded-md overflow-hidden bg-bg-overlay shrink-0">
-          {ep.imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={ep.imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
-          )}
+          <SafeImage src={ep.imageUrl} seed={ep.id} title={ep.title} kind="backdrop" loading="lazy" className="w-full h-full object-cover" />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium text-ink truncate">

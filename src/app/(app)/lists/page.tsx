@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/Section";
 import { CreateListForm } from "@/components/CreateListForm";
 import Link from "next/link";
 import { ListIcon } from "@/components/icons";
+import { SafeImage } from "@/components/SafeImage";
 
 export default async function ListsPage() {
   const user = await requireUser();
@@ -42,12 +43,10 @@ export default async function ListsPage() {
               <div className="flex -space-x-3">
                 {list.items.map((item) => {
                   const poster = item.show?.posterUrl ?? item.movie?.posterUrl;
+                  const itemTitle = item.show?.title ?? item.movie?.title ?? "";
                   return (
                     <div key={item.id} className="w-10 h-14 rounded-md overflow-hidden border-2 border-bg-raised bg-bg-overlay">
-                      {poster && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={poster} alt="" className="w-full h-full object-cover" />
-                      )}
+                      <SafeImage src={poster} seed={item.id} title={itemTitle} kind="poster" className="w-full h-full object-cover" />
                     </div>
                   );
                 })}

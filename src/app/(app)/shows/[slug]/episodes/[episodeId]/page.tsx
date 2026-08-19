@@ -6,6 +6,7 @@ import { SpoilerGate } from "@/components/SpoilerGate";
 import { ReactionBar } from "@/components/ReactionBar";
 import { EpisodeWatchToggle } from "@/components/EpisodeWatchToggle";
 import { BackButton } from "@/components/BackButton";
+import { SafeImage } from "@/components/SafeImage";
 import type { ReactionType } from "@/lib/constants";
 
 export default async function EpisodeDetailPage({ params }: { params: { slug: string; episodeId: string } }) {
@@ -47,10 +48,7 @@ export default async function EpisodeDetailPage({ params }: { params: { slug: st
       </div>
 
       <div className="mt-4 rounded-xl2 overflow-hidden bg-bg-overlay border border-border-subtle aspect-video">
-        {episode.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={episode.imageUrl} alt="" className="w-full h-full object-cover" />
-        )}
+        <SafeImage src={episode.imageUrl} seed={episode.id} title={episode.title} kind="backdrop" className="w-full h-full object-cover" />
       </div>
 
       <div className="mt-4 flex items-start justify-between gap-4 flex-wrap">

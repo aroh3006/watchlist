@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/session";
 import { getMetadataProvider } from "@/lib/metadata";
 import { prisma } from "@/lib/prisma";
 import { DiscoverCard } from "@/components/DiscoverCard";
-import { PosterCard } from "@/components/PosterCard";
+import { PosterCard, PosterRow } from "@/components/PosterCard";
 import { Section, EmptyState } from "@/components/Section";
 
 export default async function DiscoverPage({ searchParams }: { searchParams: { q?: string; genre?: string } }) {
@@ -82,46 +82,46 @@ export default async function DiscoverPage({ searchParams }: { searchParams: { q
           {searchShows.length === 0 && searchMovies.length === 0 ? (
             <EmptyState title="No results" body="Try a different title, genre, or actor name." />
           ) : (
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <PosterRow>
               {searchShows.map((s) => (
                 <DiscoverCard key={s.externalId} title={s.title} posterUrl={s.posterUrl} subtitle="Show" type="show" provider={s.provider} externalId={s.externalId} />
               ))}
               {searchMovies.map((m) => (
                 <DiscoverCard key={m.externalId} title={m.title} posterUrl={m.posterUrl} subtitle="Movie" type="movie" provider={m.provider} externalId={m.externalId} />
               ))}
-            </div>
+            </PosterRow>
           )}
         </Section>
       )}
 
       {genreSlug && (genreShows.length > 0 || genreMovies.length > 0) && (
         <Section title={`${genres.find((g) => g.slug === genreSlug)?.name ?? "Genre"}`}>
-          <div className="flex gap-3 overflow-x-auto pb-2">
+          <PosterRow>
             {genreShows.map((s) => (
               <PosterCard key={s.id} href={`/shows/${s.slug}`} title={s.title} posterUrl={s.posterUrl} subtitle="Show" />
             ))}
             {genreMovies.map((m) => (
               <PosterCard key={m.id} href={`/movies/${m.slug}`} title={m.title} posterUrl={m.posterUrl} subtitle="Movie" />
             ))}
-          </div>
+          </PosterRow>
         </Section>
       )}
 
       {!query && !genreSlug && (
         <>
           <Section title="Trending Shows">
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <PosterRow>
               {trending.shows.map((s) => (
                 <DiscoverCard key={s.externalId} title={s.title} posterUrl={s.posterUrl} subtitle="Show" type="show" provider={s.provider} externalId={s.externalId} />
               ))}
-            </div>
+            </PosterRow>
           </Section>
           <Section title="Trending Movies">
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <PosterRow>
               {trending.movies.map((m) => (
                 <DiscoverCard key={m.externalId} title={m.title} posterUrl={m.posterUrl} subtitle="Movie" type="movie" provider={m.provider} externalId={m.externalId} />
               ))}
-            </div>
+            </PosterRow>
           </Section>
         </>
       )}

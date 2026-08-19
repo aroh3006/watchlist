@@ -85,6 +85,7 @@ export default async function ShowsPage({ searchParams }: { searchParams: { view
                   posterUrl={s.posterUrl}
                   subtitle={s.status ? WATCH_STATUS_LABEL[s.status as WatchStatus] : undefined}
                   progressPct={p && p.total > 0 ? (p.watched / p.total) * 100 : undefined}
+                  fixedWidth={false}
                 />
               );
             })}

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { CheckCircleIcon } from "./icons";
+import { SafeImage } from "./SafeImage";
 
 export interface NextEpisodeCardData {
   showId: string;
@@ -47,10 +48,14 @@ export function NextEpisodeCard({ data }: { data: NextEpisodeCardData }) {
     <div className="relative flex gap-3 rounded-xl2 border border-border bg-bg-raised p-3 hover:border-brand-700 transition-colors w-[300px] sm:w-[360px] shrink-0">
       <Link href={`/shows/${data.showSlug}`} className="shrink-0 focus-ring rounded-lg">
         <div className="w-24 h-16 rounded-lg overflow-hidden bg-bg-overlay">
-          {data.imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={data.imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
-          )}
+          <SafeImage
+            src={data.imageUrl}
+            seed={data.episodeId}
+            title={data.episodeTitle}
+            kind="backdrop"
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
         </div>
       </Link>
       <div className="min-w-0 flex-1">

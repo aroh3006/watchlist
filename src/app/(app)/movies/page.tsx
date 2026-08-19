@@ -69,6 +69,7 @@ export default async function MoviesPage({ searchParams }: { searchParams: { vie
                 title={m.title}
                 posterUrl={m.posterUrl}
                 subtitle={m.status ? WATCH_STATUS_LABEL[m.status as WatchStatus] : undefined}
+                fixedWidth={false}
               />
             ))}
           </PosterGrid>

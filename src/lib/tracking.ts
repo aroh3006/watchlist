@@ -208,7 +208,14 @@ export async function getShowProgress(userId: string, showId: string) {
     select: { episodeId: true },
   });
   const watchedIds = new Set(watches.map((w) => w.episodeId));
-  const nextEpisode = episodes.find((e) => !watchedIds.has(e.id)) ?? null;
+  const now = new Date();
+  // "Next episode" only surfaces episodes that have actually aired. An
+  // announced-but-unaired episode (airDate null or in the future) is not
+  // something to watch yet, so it's skipped here even though it still
+  // counts toward totalEpisodes below. This is a live comparison against
+  // `now` at query time, not a stored flag, so an episode starts appearing
+  // on its own the moment its air date passes.
+  const nextEpisode = episodes.find((e) => !watchedIds.has(e.id) && e.airDate !== null && e.airDate <= now) ?? null;
 
   return {
     totalEpisodes: episodes.length,

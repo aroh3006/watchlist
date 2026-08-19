@@ -30,9 +30,21 @@ export default async function ListDetailPage({ params }: { params: { id: string 
         <PosterGrid>
           {list.items.map((item) =>
             item.show ? (
-              <PosterCard key={item.id} href={`/shows/${item.show.slug}`} title={item.show.title} posterUrl={item.show.posterUrl} />
+              <PosterCard
+                key={item.id}
+                href={`/shows/${item.show.slug}`}
+                title={item.show.title}
+                posterUrl={item.show.posterUrl}
+                fixedWidth={false}
+              />
             ) : item.movie ? (
-              <PosterCard key={item.id} href={`/movies/${item.movie.slug}`} title={item.movie.title} posterUrl={item.movie.posterUrl} />
+              <PosterCard
+                key={item.id}
+                href={`/movies/${item.movie.slug}`}
+                title={item.movie.title}
+                posterUrl={item.movie.posterUrl}
+                fixedWidth={false}
+              />
             ) : null
           )}
         </PosterGrid>

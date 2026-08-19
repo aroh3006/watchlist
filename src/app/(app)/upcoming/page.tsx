@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/Section";
+import { SafeImage } from "@/components/SafeImage";
 
 function daysUntil(date: Date): string {
   const diff = Math.ceil((date.getTime() - Date.now()) / 86400000);
@@ -13,15 +14,25 @@ export default async function UpcomingPage() {
   const user = await requireUser();
   const now = new Date();
 
+  // Dropped/Paused shows and movies are excluded here even if they have a
+  // future air date/release, since the user isn't actively following them
+  // anymore. This only affects this query; the Shows/Movies library filter
+  // tabs still read status directly and are unaffected.
   const [episodes, movies] = await Promise.all([
     prisma.episode.findMany({
-      where: { airDate: { gt: now }, show: { userShows: { some: { userId: user.id } } } },
+      where: {
+        airDate: { gt: now },
+        show: { userShows: { some: { userId: user.id, status: { in: ["WATCHING", "PLANNED"] } } } },
+      },
       orderBy: { airDate: "asc" },
       include: { season: { include: { show: true } } },
       take: 60,
     }),
     prisma.movie.findMany({
-      where: { releaseDate: { gt: now }, userMovies: { some: { userId: user.id } } },
+      where: {
+        releaseDate: { gt: now },
+        userMovies: { some: { userId: user.id, status: { in: ["WATCHING", "PLANNED"] } } },
+      },
       orderBy: { releaseDate: "asc" },
       take: 30,
     }),
@@ -80,10 +91,7 @@ export default async function UpcomingPage() {
                       className="flex items-center gap-3 rounded-xl2 border border-border-subtle bg-bg-raised p-3 hover:border-brand-700 transition-colors focus-ring"
                     >
                       <div className="w-12 h-16 rounded-md overflow-hidden bg-bg-overlay shrink-0">
-                        {item.posterUrl && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={item.posterUrl} alt="" className="w-full h-full object-cover" />
-                        )}
+                        <SafeImage src={item.posterUrl} seed={item.href} title={item.title} kind="poster" className="w-full h-full object-cover" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{item.title}</p>

@@ -12,7 +12,7 @@ export default async function HomePage() {
   const user = await requireUserWithProfile();
 
   const watchingShows = await prisma.userShow.findMany({
-    where: { userId: user.id, status: "WATCHING" },
+    where: { userId: user.id, status: { in: ["WATCHING", "PLANNED"] } },
     include: { show: true },
     orderBy: { updatedAt: "desc" },
   });
@@ -38,14 +38,24 @@ export default async function HomePage() {
   }
 
   const now = new Date();
+  // Dropped/Paused shows and movies are excluded from Upcoming even if they
+  // have a future air date/release, since the user isn't actively following
+  // them anymore. This only affects this query; the Shows/Movies library
+  // filter tabs still read status directly and are unaffected.
   const upcomingEpisodes = await prisma.episode.findMany({
-    where: { airDate: { gt: now }, show: { userShows: { some: { userId: user.id } } } },
+    where: {
+      airDate: { gt: now },
+      show: { userShows: { some: { userId: user.id, status: { in: ["WATCHING", "PLANNED"] } } } },
+    },
     orderBy: { airDate: "asc" },
     take: 8,
     include: { season: { include: { show: true } } },
   });
   const upcomingMovies = await prisma.movie.findMany({
-    where: { releaseDate: { gt: now }, userMovies: { some: { userId: user.id } } },
+    where: {
+      releaseDate: { gt: now },
+      userMovies: { some: { userId: user.id, status: { in: ["WATCHING", "PLANNED"] } } },
+    },
     orderBy: { releaseDate: "asc" },
     take: 8,
   });
