@@ -19,7 +19,7 @@ export function activityScoreFor(episodeCount: number, movieCount: number): numb
 /**
  * Rebuilds the DailyWatchActivity materialized rollup for a user from the
  * authoritative EpisodeWatch/MovieWatch event log. Safe to call repeatedly
- * (e.g. after an import or a manual watch toggle) — it's a derived cache,
+ * (e.g. after an import or a manual watch toggle). It's a derived cache,
  * never a source of truth.
  */
 export async function recomputeDailyActivityForUser(userId: string): Promise<void> {
@@ -81,7 +81,7 @@ export interface StreakResult {
 /**
  * Streak definition: a "day" counts as active if it has at least one watch
  * event. The current streak counts consecutive active days ending at
- * *today or yesterday* — i.e. if the user watched yesterday but not yet
+ * *today or yesterday*. If the user watched yesterday but not yet
  * today, the streak is still considered live (they have until the end of
  * today, their time, to keep it going). If the most recent activity is
  * older than yesterday, the current streak is 0.

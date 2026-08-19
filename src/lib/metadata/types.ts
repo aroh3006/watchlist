@@ -1,6 +1,6 @@
 /**
  * Provider-agnostic metadata shapes. The rest of the application only ever
- * talks to these types — never to a specific provider's response shape.
+ * talks to these types, never to a specific provider's response shape.
  * This is what lets Watchlist swap TheTVDB/TMDB/a future licensed dataset
  * in and out without touching UI or database code.
  */

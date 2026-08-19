@@ -30,8 +30,8 @@ h1, h2, h3, .font-display {
 }
 
 /* A faint structural grid, the way a designed editorial page uses hairlines
-   to feel intentional rather than a flat, empty panel. Barely visible —
-   texture, not decoration. */
+   to feel intentional rather than a flat, empty panel. Barely visible.
+   Texture, not decoration. */
 .grid-texture {
   background-image:
     linear-gradient(to right, rgba(28, 26, 21, 0.05) 1px, transparent 1px),

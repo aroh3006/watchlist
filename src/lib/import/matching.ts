@@ -9,7 +9,7 @@ export interface MatchCandidate {
   posterUrl: string | null;
   year: number | null;
   score: number;
-  /** Set when this candidate hasn't been materialized into the local DB yet — resolution must sync it first. */
+  /** Set when this candidate hasn't been materialized into the local DB yet. Resolution must sync it first. */
   providerRef?: { provider: string; externalId: string };
 }
 
@@ -25,7 +25,7 @@ function normalizeTitle(s: string): string {
 }
 
 /**
- * A candidate is auto-matched only when it's the single clear winner — its
+ * A candidate is auto-matched only when it's the single clear winner. Its
  * score clears the auto-match bar AND no other candidate ties it. Multiple
  * candidates tied at the top (e.g. two shows with an identical title) still
  * go to manual review; this is what keeps "never silently match an
@@ -42,11 +42,11 @@ function pickWinner(scored: MatchCandidate[]): MatchCandidate | null {
 /**
  * Matching priority, per spec: exact external id > exact normalized title
  * (+year when available) > fuzzy title > ambiguous/unmatched. Never picks
- * an obviously ambiguous title automatically — multiple close candidates
+ * an obviously ambiguous title automatically. Multiple close candidates
  * are surfaced for manual review instead of guessing.
  *
  * If nothing in Watchlist's own catalog matches, falls back to searching
- * the active metadata provider (see src/lib/metadata) — this is what lets
+ * the active metadata provider (see src/lib/metadata). This is what lets
  * import discover and add real-world titles that were never in the local
  * catalog to begin with, not just re-match existing entries.
  */
@@ -85,7 +85,7 @@ export async function matchShow(row: NormalizedRow): Promise<MatchOutcome> {
   if (localWinner) return { status: "MATCHED", entityId: localWinner.id };
   if (localScored.length > 0) return { status: "AMBIGUOUS", candidates: localScored };
 
-  // Nothing local — ask the active metadata provider before giving up.
+  // Nothing local, ask the active metadata provider before giving up.
   const provider = getMetadataProvider();
   const results = await provider.searchShows({ query: row.title, limit: 5 }).catch(() => []);
   if (results.length === 0) return { status: "UNMATCHED" };

@@ -2,7 +2,7 @@
 // Postgres (Neon) in production; see README for local dev setup.
 //
 // NOTE: status/type fields below are plain String columns validated by TS
-// union types in src/lib/constants.ts rather than native Prisma enums — this
+// union types in src/lib/constants.ts rather than native Prisma enums. This
 // was deliberate so the app could start on SQLite (no native enum support)
 // and move to Postgres later without touching call sites. Prisma's
 // `datasource.provider` is fixed per schema file, though, so unlike the
@@ -365,7 +365,7 @@ model MovieWatch {
 
 // Materialized per-day rollup that backs the profile contribution heatmap
 // and statistics screens without re-scanning WatchEvent history each time.
-// Always derivable from EpisodeWatch/MovieWatch — never a source of truth.
+// Always derivable from EpisodeWatch/MovieWatch. Never a source of truth.
 model DailyWatchActivity {
   id            String   @id @default(cuid())
   userId        String
@@ -463,7 +463,7 @@ model CustomListItem {
 }
 
 // ---------------------------------------------------------------------------
-// Badges (rules engine — see src/lib/badges/*)
+// Badges (rules engine, see src/lib/badges/*)
 // ---------------------------------------------------------------------------
 
 model Badge {

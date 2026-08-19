@@ -1,7 +1,7 @@
 /**
  * Original, non-infringing seed dataset used by the "local" metadata
  * provider. Every title, character, and person here is fictional and
- * created for Watchlist's development/demo environment — none of it is
+ * created for Watchlist's development/demo environment. None of it is
  * sourced from TheTVDB, TMDB, or any other proprietary database.
  *
  * This file is intentionally the *only* place that knows what "local" data

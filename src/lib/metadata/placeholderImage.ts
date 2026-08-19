@@ -1,7 +1,7 @@
 /**
  * Deterministic, tastefully-designed placeholder artwork used until real
  * licensed poster/backdrop images are available (see the metadata provider
- * abstraction — swapping in TMDB or a licensed dataset replaces these with
+ * abstraction; swapping in TMDB or a licensed dataset replaces these with
  * real posterUrl/backdropUrl values with no other code changes).
  *
  * Deliberately NOT a random-hue gradient with giant initials: every card
@@ -10,7 +10,7 @@
  * placeholders reads as one designed system rather than generated noise.
  */
 
-// A handful of muted accents drawn from the app's palette — never a raw
+// A handful of muted accents drawn from the app's palette, never a raw
 // 0-360 hue sweep, which is what makes bulk placeholder art look generated.
 const ACCENTS = ["#284b68", "#8fb2cf", "#a1442b", "#c48a5a", "#7a6a45", "#4d7c9e"];
 

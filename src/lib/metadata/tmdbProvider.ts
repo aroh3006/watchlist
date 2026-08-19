@@ -11,7 +11,7 @@ import type {
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
 /**
- * Adapter for The Movie Database (TMDB) API — an openly licensed metadata
+ * Adapter for The Movie Database (TMDB) API, an openly licensed metadata
  * source (https://www.themoviedb.org/documentation/api) usable as a legal
  * stand-in for TheTVDB's historical role in TV Time. Requires
  * METADATA_TMDB_API_KEY. This class is the *only* place in the codebase
@@ -32,7 +32,7 @@ export class TmdbProvider implements MetadataProvider {
     url.searchParams.set("api_key", this.apiKey);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
     // Next.js defaults an unconfigured fetch() to force-cache, which would
-    // silently serve stale TMDB data indefinitely — even on pages that
+    // silently serve stale TMDB data indefinitely, even on pages that
     // otherwise render dynamically (dynamic rendering and fetch caching are
     // independent). Revalidate hourly instead of caching forever.
     const res = await fetch(url.toString(), { next: { revalidate: 3600 } });

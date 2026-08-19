@@ -8,13 +8,13 @@
  * one merged "title". Several real TV Time export tables carry both a
  * `movie_name` and a `series_name` column on every row, populating exactly
  * one of them per row depending on what that row is about (the other is
- * blank) — collapsing them into a single title column at the file level
+ * blank). Collapsing them into a single title column at the file level
  * would silently drop the correct value for whichever type didn't win.
  * Per-row resolution below picks whichever is actually populated.
  */
 
 const SYNONYMS: Record<string, string[]> = {
-  // Deliberately does NOT include a bare "name" alias — that column name is
+  // Deliberately does NOT include a bare "name" alias. That column name is
   // extremely common on unrelated key/value and settings tables in raw
   // exports (e.g. `{id, name, value}` device/app-setting rows), and treating
   // it as a title caused garbage strings to be searched as movie titles.
@@ -59,8 +59,8 @@ export type DetectedFileKind = "episodes" | "movies" | "shows" | "ratings" | "un
 
 export function detectFileKind(headers: string[]): DetectedFileKind {
   const map = buildFieldMap(headers);
-  // A file with both movie- and show-title columns carries mixed content —
-  // routing happens per row (see normalizeRow's `type`), not per file.
+  // A file with both movie- and show-title columns carries mixed content.
+  // Routing happens per row (see normalizeRow's `type`), not per file.
   if (map.movieTitle && map.showTitle) return "unknown";
   if (map.episodeNumber || map.season) return "episodes";
   if (map.type) return "unknown";

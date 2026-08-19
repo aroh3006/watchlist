@@ -118,7 +118,7 @@ export function ruleSatisfied(rule: BadgeRule, s: UserSignals): boolean {
 
 /**
  * Evaluates every badge rule against the user's current stats and awards
- * any newly-earned badges. Idempotent — already-earned badges are skipped.
+ * any newly-earned badges. Idempotent. Already-earned badges are skipped.
  * Returns the list of badge keys newly awarded (useful for notifications).
  */
 export async function evaluateBadgesForUser(userId: string): Promise<string[]> {

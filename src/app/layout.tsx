@@ -4,7 +4,7 @@ import "./globals.css";
 import SessionProviderClient from "@/components/SessionProviderClient";
 
 // Helvetica isn't distributable as a web font (no Google Fonts license for
-// it) — this stack renders genuine Helvetica on macOS/iOS, where the OS
+// it). This stack renders genuine Helvetica on macOS/iOS, where the OS
 // ships it, and falls back to Arial elsewhere, a metrically-identical clone.
 const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono", display: "swap" });
 

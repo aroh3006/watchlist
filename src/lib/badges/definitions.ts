@@ -1,7 +1,7 @@
 /**
  * Declarative badge catalogue. Adding a new badge means adding an entry
  * here plus (if it needs a new signal) a case in the evaluator switch in
- * engine.ts — the UI, database seeding, and award logic all read from this
+ * engine.ts. The UI, database seeding, and award logic all read from this
  * single list rather than hard-coding each badge individually.
  */
 

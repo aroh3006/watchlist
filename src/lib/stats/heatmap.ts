@@ -28,7 +28,7 @@ const RANGE_DAYS: Record<string, number> = {
 
 /**
  * Builds the profile contribution heatmap directly from the materialized
- * DailyWatchActivity rollup (itself derived from WatchEvent history — see
+ * DailyWatchActivity rollup (itself derived from WatchEvent history, see
  * recomputeDailyActivityForUser). Fills in zero-activity days so the grid
  * is a complete, gapless calendar.
  */

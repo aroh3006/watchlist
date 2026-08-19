@@ -95,7 +95,7 @@ function movieToDetail(m: SeedMovie): MetaMovieDetail {
 
 /**
  * Ships-with-Watchlist metadata source. Entirely original fictional
- * content — no external network calls, no proprietary data. This is the
+ * content. No external network calls, no proprietary data. This is the
  * default provider so the app is fully usable offline out of the box.
  */
 export class LocalDatasetProvider implements MetadataProvider {

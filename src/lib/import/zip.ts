@@ -16,8 +16,8 @@ const MAX_TOTAL_ENTRIES = 500;
 /**
  * Safely extracts CSV files from a ZIP buffer entirely in memory (no files
  * ever touch disk, so there is nothing for a zip-slip path to escape into).
- * Rejects/records anything that isn't a plain, safely-named .csv entry —
- * path traversal (`../`), absolute paths, and non-CSV content are all
+ * Rejects/records anything that isn't a plain, safely-named .csv entry.
+ * Path traversal (`../`), absolute paths, and non-CSV content are all
  * skipped rather than extracted.
  */
 export async function extractCsvFilesFromZip(buffer: Buffer): Promise<ZipExtractionResult> {

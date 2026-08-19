@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-/** Gathers every piece of a user's own data for export — profile through import history. */
+/** Gathers every piece of a user's own data for export, profile through import history. */
 export async function gatherUserExport(userId: string) {
   const [
     user,

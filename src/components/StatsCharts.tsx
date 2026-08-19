@@ -15,8 +15,8 @@ import {
 } from "recharts";
 import type { MonthlyPoint, GenreSlice } from "@/lib/stats/dashboard";
 
-// A curated, desaturated palette — variations on the app's ink-blue accent
-// and warm neutrals, not a rainbow of saturated "AI demo" colors.
+// A curated, desaturated palette. Variations on the app's ink-blue accent
+// and warm neutrals, not a rainbow of saturated demo colors.
 const PIE_COLORS = ["#284b68", "#a1442b", "#8fb2cf", "#7a6a45", "#4d7c9e", "#c48a5a", "#1f3a52", "#9c8c6a"];
 
 const FONT_STACK = "'Helvetica Neue', Helvetica, Arial, -apple-system, BlinkMacSystemFont, sans-serif";

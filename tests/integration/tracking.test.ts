@@ -4,8 +4,8 @@ import { markEpisodeWatched, markShowWatched, getShowProgress } from "@/lib/trac
 
 /**
  * Integration tests against the real (local SQLite) Prisma client. Creates
- * an isolated test user/show and cleans up via cascade delete afterward —
- * never touches the demo user's data.
+ * an isolated test user/show and cleans up via cascade delete afterward.
+ * Never touches the demo user's data.
  */
 
 let userId: string;

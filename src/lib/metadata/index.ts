@@ -8,7 +8,7 @@ let cached: MetadataProvider | null = null;
 
 /**
  * Single point of provider selection, driven by METADATA_PROVIDER. Nothing
- * outside this module should decide which provider to use — that keeps a
+ * outside this module should decide which provider to use. That keeps a
  * future provider swap (or a licensed local dataset drop-in) to a one-line
  * env var change instead of an application rewrite.
  */

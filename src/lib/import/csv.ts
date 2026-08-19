@@ -9,7 +9,7 @@ export interface ParsedCsv {
 /**
  * Parses CSV text into rows, tolerating BOM, CRLF/LF/CR line endings,
  * quoted values containing commas, and missing/unknown columns. Never
- * throws on malformed individual rows — collects parse errors instead so a
+ * throws on malformed individual rows. Collects parse errors instead so a
  * few bad lines don't sink the whole file.
  */
 export function parseCsv(buffer: Buffer): ParsedCsv {

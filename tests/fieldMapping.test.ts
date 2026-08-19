@@ -19,7 +19,7 @@ describe("buildFieldMap", () => {
 
   it("does not treat a generic 'name' column as a title", () => {
     // Real-world exports often have unrelated {id, name, value} settings
-    // tables — a bare "name" column must never be searched as a title.
+    // tables. A bare "name" column must never be searched as a title.
     const map = buildFieldMap(["id", "name", "value", "user_id"]);
     expect(map.showTitle).toBeUndefined();
     expect(map.movieTitle).toBeUndefined();
@@ -42,7 +42,7 @@ describe("detectFileKind", () => {
 
   it("classifies a file with both movie and show title columns as mixed/unknown", () => {
     // Real TV Time export tables denormalize movie_name AND series_name onto
-    // every row, populating only one per row — file-level classification
+    // every row, populating only one per row. File-level classification
     // can't know which applies row-by-row, so routing defers to normalizeRow.
     expect(detectFileKind(["movie_name", "series_name", "season_number", "episode_number"])).toBe("unknown");
   });

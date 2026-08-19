@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Warm paper/cream — editorial print feel, not a generic dark "AI demo" panel.
+        // Warm paper/cream, editorial print feel, not a generic dark demo panel.
         bg: {
           DEFAULT: "#f3ede0",
           raised: "#faf7ee",
@@ -26,7 +26,7 @@ const config: Config = {
           faint: "#a39a82",
         },
         // Single restrained accent: deep ink-blue, dark enough to read as text
-        // on a cream page — not the pale/neon blue that only works on dark UI.
+        // on a cream page. Not the pale/neon blue that only works on dark UI.
         brand: {
           50: "#eaf1f7",
           100: "#cddfec",

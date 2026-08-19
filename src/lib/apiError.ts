@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-/** Never leak stack traces or internal details to the client — log server-side instead. */
+/** Never leak stack traces or internal details to the client. Log server-side instead. */
 export function handleApiError(err: unknown, fallbackMessage = "Something went wrong.") {
   console.error(err);
   if (err instanceof Error && (err as { statusCode?: number }).statusCode) {

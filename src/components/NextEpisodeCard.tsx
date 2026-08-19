@@ -25,7 +25,7 @@ export function NextEpisodeCard({ data }: { data: NextEpisodeCardData }) {
   const [done, setDone] = useState(false);
 
   // After marking watched, the server sends back the show's *new* next
-  // episode under the same card (same showId key) — without this, "done"
+  // episode under the same card (same showId key). Without this, "done"
   // would stay stuck true forever since useState's initial value only
   // applies on mount, permanently disabling the button after one click.
   useEffect(() => setDone(false), [data.episodeId]);
