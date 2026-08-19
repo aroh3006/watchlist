@@ -35,6 +35,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# local tooling
+CLAUDE.md
+.claude/
+
 # misc
 /tmp
 /uploads
