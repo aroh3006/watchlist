@@ -138,7 +138,7 @@ export function ShowActions({
         Favorite
       </button>
 
-      <RatingStars score={rating} onChange={setUserRating} />
+      <RatingStars score={rating} onChange={setUserRating} onClear={clearUserRating} />
     </div>
   );
 }

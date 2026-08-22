@@ -16,10 +16,12 @@ function formatStars(displayValue: number): string {
 export function RatingStars({
   score,
   onChange,
+  onClear,
   size = 16,
 }: {
   score: number;
   onChange: (score: number) => void;
+  onClear: () => void;
   size?: number;
 }) {
   const displayValue = score / 2;
@@ -59,7 +61,14 @@ export function RatingStars({
           );
         })}
       </div>
-      {score > 0 && <span className="text-xs text-ink-muted">{formatStars(displayValue)}/5</span>}
+      {score > 0 && (
+        <>
+          <span className="text-xs text-ink-muted">{formatStars(displayValue)}/5</span>
+          <button type="button" onClick={onClear} className="text-xs text-ink-faint hover:text-accent focus-ring rounded px-1">
+            Clear
+          </button>
+        </>
+      )}
     </div>
   );
 }

@@ -211,6 +211,19 @@ export async function rate(userId: string, targetType: "SHOW" | "EPISODE" | "MOV
   return prisma.rating.create({ data: { ...filter, score } });
 }
 
+/** score is not nullable on Rating, so an unrated item is one with no row at all. */
+export async function clearRating(userId: string, targetType: "SHOW" | "EPISODE" | "MOVIE", id: string) {
+  await prisma.rating.deleteMany({
+    where: {
+      userId,
+      targetType,
+      showId: targetType === "SHOW" ? id : null,
+      episodeId: targetType === "EPISODE" ? id : null,
+      movieId: targetType === "MOVIE" ? id : null,
+    },
+  });
+}
+
 /** Progress for a show: episodes watched / total, plus the next unwatched episode. */
 export async function getShowProgress(userId: string, showId: string) {
   const episodes = await prisma.episode.findMany({
