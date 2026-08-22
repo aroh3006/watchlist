@@ -87,11 +87,22 @@ export function ShowActions({
     startTransition(() => router.refresh());
   }
 
+  function onStatusSelect(next: string) {
+    // Not Watched deletes data, so picking it only opens the confirm
+    // dialog. The select shows it as chosen while the dialog is open, but
+    // nothing is applied until the user actually confirms.
+    if (next === "NOT_WATCHED") {
+      setConfirmingRemove(true);
+      return;
+    }
+    updateStatus(next);
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <select
-        value={status}
-        onChange={(e) => updateStatus(e.target.value)}
+        value={confirmingRemove ? "NOT_WATCHED" : status}
+        onChange={(e) => onStatusSelect(e.target.value)}
         disabled={saving}
         aria-label="Watch status"
         className="rounded-lg bg-bg-overlay border border-border px-3 py-2 text-sm focus-ring"
@@ -104,27 +115,32 @@ export function ShowActions({
             {WATCH_STATUS_LABEL[s]}
           </option>
         ))}
+        {kind === "movie" && <option value="NOT_WATCHED">Not Watched</option>}
       </select>
 
-      {kind === "movie" &&
-        (confirmingRemove ? (
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-ink-muted">Remove tracking, rating, and favorite for this movie?</span>
-            <button onClick={markNotWatched} disabled={removing} className="text-accent font-medium focus-ring rounded px-2 py-1">
-              {removing ? "Removing..." : "Not Watched"}
-            </button>
-            <button onClick={() => setConfirmingRemove(false)} className="text-ink-muted focus-ring rounded px-2 py-1">
-              Cancel
-            </button>
+      {confirmingRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-xl2 border border-border bg-bg-raised p-5 shadow-card">
+            <p className="font-semibold text-sm mb-1">Remove this movie?</p>
+            <p className="text-xs text-ink-muted mb-4">Remove tracking, rating and favorite for this movie?</p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmingRemove(false)}
+                className="px-3 py-1.5 rounded-lg text-xs border border-border text-ink-muted hover:text-ink transition-colors focus-ring"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={markNotWatched}
+                disabled={removing}
+                className="px-3 py-1.5 rounded-lg text-xs bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white transition-colors focus-ring"
+              >
+                {removing ? "Removing..." : "Not Watched"}
+              </button>
+            </div>
           </div>
-        ) : (
-          <button
-            onClick={() => setConfirmingRemove(true)}
-            className="rounded-lg border px-3 py-2 text-sm border-border text-ink-muted hover:text-ink hover:border-ink-faint transition-colors focus-ring"
-          >
-            Not Watched
-          </button>
-        ))}
+        </div>
+      )}
 
       <button
         onClick={toggleFavorite}
