@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { WATCH_STATUSES, WATCH_STATUS_LABEL, type WatchStatus } from "@/lib/constants";
 import { StarIcon } from "./icons";
+import { RatingStars } from "./RatingStars";
 
 export function ShowActions({
   showId,
@@ -92,20 +93,7 @@ export function ShowActions({
         Favorite
       </button>
 
-      <div className="flex items-center gap-0.5" role="group" aria-label="Your rating">
-        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-          <button
-            key={n}
-            onClick={() => setUserRating(n)}
-            aria-label={`Rate ${n} out of 10`}
-            aria-pressed={rating >= n}
-            className="focus-ring rounded"
-          >
-            <StarIcon width={16} height={16} className={n <= rating ? "text-brand-300" : "text-ink-faint"} fill={n <= rating ? "currentColor" : "none"} />
-          </button>
-        ))}
-        {rating > 0 && <span className="text-xs text-ink-muted ml-1">{rating}/10</span>}
-      </div>
+      <RatingStars score={rating} onChange={setUserRating} />
     </div>
   );
 }
