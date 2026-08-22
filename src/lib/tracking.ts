@@ -151,11 +151,26 @@ export async function setShowStatus(userId: string, showId: string, status: stri
 }
 
 export async function setMovieStatus(userId: string, movieId: string, status: string) {
-  return prisma.userMovie.upsert({
+  const existing = await prisma.userMovie.findUnique({ where: { userId_movieId: { userId, movieId } } });
+  const becameCompleted = status === "COMPLETED" && existing?.status !== "COMPLETED";
+
+  const result = await prisma.userMovie.upsert({
     where: { userId_movieId: { userId, movieId } },
     update: { status },
     create: { userId, movieId, status },
   });
+
+  // The status picker is the only place most users mark a movie completed,
+  // so it needs to record the same MovieWatch event markMovieWatched does.
+  // Without this, the movie never shows up in stats or the activity heatmap.
+  if (becameCompleted) {
+    const watchedAt = new Date();
+    const dedupeKey = stableDedupeKey([userId, "movie", movieId, watchedAt.toISOString(), "status-change"]);
+    await prisma.movieWatch.create({ data: { userId, movieId, watchedAt, source: "status-change", dedupeKey } });
+    await afterWatchChange(userId);
+  }
+
+  return result;
 }
 
 // SQLite's Prisma connector rejects `null` inside a composite-unique
