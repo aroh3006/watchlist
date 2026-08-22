@@ -17,10 +17,20 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 }
 
+// Removing a movie this way means "not watched, never happened", so its
+// UserMovie, Rating, and Favorite rows are all cleared together, the movie
+// goes back to looking exactly like one the user never touched. MovieWatch
+// and DailyWatchActivity are deliberately left alone: they record real
+// watch events, and clearing tracking status later should never erase
+// history that already happened.
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireUser();
-    await prisma.userMovie.deleteMany({ where: { userId: user.id, movieId: params.id } });
+    await prisma.$transaction([
+      prisma.userMovie.deleteMany({ where: { userId: user.id, movieId: params.id } }),
+      prisma.rating.deleteMany({ where: { userId: user.id, targetType: "MOVIE", movieId: params.id } }),
+      prisma.favorite.deleteMany({ where: { userId: user.id, targetType: "MOVIE", movieId: params.id } }),
+    ]);
     return NextResponse.json({ ok: true });
   } catch (err) {
     return handleApiError(err, "Could not remove movie.");

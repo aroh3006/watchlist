@@ -25,6 +25,8 @@ export function ShowActions({
   const [favorited, setFavorited] = useState(initialFavorited);
   const [rating, setRating] = useState(initialRating ?? 0);
   const [saving, setSaving] = useState(false);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const statusEndpoint = kind === "show" ? `/api/shows/${showId}/status` : `/api/movies/${showId}/status`;
 
@@ -60,6 +62,31 @@ export function ShowActions({
     startTransition(() => router.refresh());
   }
 
+  async function clearUserRating() {
+    setRating(0);
+    await fetch("/api/ratings", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ targetType: kind === "show" ? "SHOW" : "MOVIE", id: showId }),
+    });
+    startTransition(() => router.refresh());
+  }
+
+  // "Not Watched" fully untracks a movie: it deletes UserMovie, Rating, and
+  // Favorite so the page looks exactly like a movie the user never touched.
+  // MovieWatch/DailyWatchActivity are never touched by this, real watch
+  // history is never erased just because tracking status changes later.
+  async function markNotWatched() {
+    setRemoving(true);
+    await fetch(statusEndpoint, { method: "DELETE" });
+    setStatus("");
+    setFavorited(false);
+    setRating(0);
+    setRemoving(false);
+    setConfirmingRemove(false);
+    startTransition(() => router.refresh());
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <select
@@ -72,14 +99,32 @@ export function ShowActions({
         <option value="" disabled>
           {status ? WATCH_STATUS_LABEL[status as WatchStatus] : "Add to library"}
         </option>
-        {WATCH_STATUSES.filter((s) =>
-          kind === "movie" ? s !== "WATCHING" && s !== "PAUSED" : s !== "NOT_WATCHED"
-        ).map((s) => (
+        {WATCH_STATUSES.filter((s) => (kind === "movie" ? s !== "WATCHING" && s !== "PAUSED" : true)).map((s) => (
           <option key={s} value={s}>
             {WATCH_STATUS_LABEL[s]}
           </option>
         ))}
       </select>
+
+      {kind === "movie" &&
+        (confirmingRemove ? (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-ink-muted">Remove tracking, rating, and favorite for this movie?</span>
+            <button onClick={markNotWatched} disabled={removing} className="text-accent font-medium focus-ring rounded px-2 py-1">
+              {removing ? "Removing..." : "Not Watched"}
+            </button>
+            <button onClick={() => setConfirmingRemove(false)} className="text-ink-muted focus-ring rounded px-2 py-1">
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmingRemove(true)}
+            className="rounded-lg border px-3 py-2 text-sm border-border text-ink-muted hover:text-ink hover:border-ink-faint transition-colors focus-ring"
+          >
+            Not Watched
+          </button>
+        ))}
 
       <button
         onClick={toggleFavorite}
