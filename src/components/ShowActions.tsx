@@ -71,7 +71,9 @@ export function ShowActions({
         <option value="" disabled>
           {status ? WATCH_STATUS_LABEL[status as WatchStatus] : "Add to library"}
         </option>
-        {WATCH_STATUSES.filter((s) => kind === "movie" ? s !== "WATCHING" && s !== "PAUSED" : true).map((s) => (
+        {WATCH_STATUSES.filter((s) =>
+          kind === "movie" ? s !== "WATCHING" && s !== "PAUSED" : s !== "NOT_WATCHED"
+        ).map((s) => (
           <option key={s} value={s}>
             {WATCH_STATUS_LABEL[s]}
           </option>

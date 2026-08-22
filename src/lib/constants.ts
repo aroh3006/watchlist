@@ -8,7 +8,7 @@
 export const SHOW_STATUSES = ["RETURNING", "ENDED", "CANCELLED", "IN_PRODUCTION", "PLANNED"] as const;
 export type ShowStatus = (typeof SHOW_STATUSES)[number];
 
-export const WATCH_STATUSES = ["PLANNED", "WATCHING", "PAUSED", "COMPLETED", "DROPPED"] as const;
+export const WATCH_STATUSES = ["PLANNED", "WATCHING", "PAUSED", "COMPLETED", "DROPPED", "NOT_WATCHED"] as const;
 export type WatchStatus = (typeof WATCH_STATUSES)[number];
 
 export const RATING_TARGET_TYPES = ["SHOW", "SEASON", "EPISODE", "MOVIE"] as const;
@@ -84,4 +84,5 @@ export const WATCH_STATUS_LABEL: Record<WatchStatus, string> = {
   PAUSED: "Paused",
   COMPLETED: "Completed",
   DROPPED: "Dropped",
+  NOT_WATCHED: "Not Watched",
 };

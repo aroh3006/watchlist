@@ -9,6 +9,8 @@ const TABS: { key: string; label: string }[] = [
   { key: "all", label: "All" },
   { key: "COMPLETED", label: "Watched" },
   { key: "PLANNED", label: "Planned" },
+  { key: "DROPPED", label: "Dropped" },
+  { key: "NOT_WATCHED", label: "Not Watched" },
   { key: "favorites", label: "Favorites" },
 ];
 
