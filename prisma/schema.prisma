@@ -527,6 +527,8 @@ model ExternalId {
   personId String?
   person   Person? @relation(fields: [personId], references: [id], onDelete: Cascade)
 
+  lastSyncedAt DateTime?
+
   @@unique([provider, entityType, externalId])
   @@index([showId])
   @@index([movieId])

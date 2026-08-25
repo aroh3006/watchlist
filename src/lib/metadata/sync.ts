@@ -24,16 +24,69 @@ async function ensurePerson(name: string, imageUrl?: string) {
  * tables, recording the provider's id in ExternalId so re-imports and
  * cross-provider matching stay stable. Called on demand when a user adds a
  * show discovered through search/discover that isn't in the DB yet.
+ *
+ * With forceRefresh on an already-synced show, this skips straight to
+ * re-upserting season/episode rows only (title, overview, runtime, airDate,
+ * imageUrl, voteAverage) and stamps lastSyncedAt. It deliberately does not
+ * touch genres or cast on refresh, those are written with create() further
+ * down and re-running that would duplicate rows.
  */
-export async function ensureShowSynced(provider: string, externalId: string): Promise<string> {
+export async function ensureShowSynced(
+  provider: string,
+  externalId: string,
+  opts?: { forceRefresh?: boolean }
+): Promise<string> {
   const existing = await prisma.externalId.findUnique({
     where: { provider_entityType_externalId: { provider, entityType: "SHOW", externalId } },
   });
-  if (existing?.showId) return existing.showId;
+  if (existing?.showId && !opts?.forceRefresh) return existing.showId;
 
   const metaProvider = getMetadataProvider();
   const detail = await metaProvider.getShow(externalId);
   if (!detail) throw new Error("Show not found in metadata provider");
+
+  if (existing?.showId) {
+    for (const season of detail.seasons) {
+      const seasonRow = await prisma.season.upsert({
+        where: { showId_seasonNumber: { showId: existing.showId, seasonNumber: season.seasonNumber } },
+        update: {},
+        create: {
+          showId: existing.showId,
+          seasonNumber: season.seasonNumber,
+          title: season.title,
+          overview: season.overview,
+          posterUrl: season.posterUrl,
+          airDate: season.airDate ? new Date(season.airDate) : null,
+        },
+      });
+      for (const ep of season.episodes) {
+        await prisma.episode.upsert({
+          where: { seasonId_episodeNumber: { seasonId: seasonRow.id, episodeNumber: ep.episodeNumber } },
+          update: {
+            title: ep.title,
+            overview: ep.overview,
+            runtime: ep.runtime,
+            airDate: ep.airDate ? new Date(ep.airDate) : null,
+            imageUrl: ep.imageUrl,
+            voteAverage: ep.voteAverage,
+          },
+          create: {
+            seasonId: seasonRow.id,
+            showId: existing.showId,
+            episodeNumber: ep.episodeNumber,
+            title: ep.title,
+            overview: ep.overview,
+            runtime: ep.runtime,
+            airDate: ep.airDate ? new Date(ep.airDate) : null,
+            imageUrl: ep.imageUrl,
+            voteAverage: ep.voteAverage,
+          },
+        });
+      }
+    }
+    await prisma.externalId.update({ where: { id: existing.id }, data: { lastSyncedAt: new Date() } });
+    return existing.showId;
+  }
 
   const slug = slugify(detail.title) + (provider !== "local" ? `-${provider}-${externalId}` : "");
   const show = await prisma.show.upsert({
@@ -195,4 +248,42 @@ export async function ensureMovieSynced(provider: string, externalId: string): P
   }
 
   return movie.id;
+}
+
+const REFRESH_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const PLACEHOLDER_TITLE = /^Episode \d+$/;
+const ENDED_STATUSES = new Set(["ENDED", "CANCELLED"]);
+
+/**
+ * Refresh-on-view for episode titles: TMDB fills in real episode titles
+ * progressively as episodes approach or pass their air date, but the
+ * initial add only ever pulls whatever TMDB has at that moment. Called from
+ * a show's detail page on every load; it is a cheap no-op unless the show
+ * actually looks stale, so it is safe to call unconditionally.
+ */
+export async function refreshShowIfStale(showId: string): Promise<boolean> {
+  const show = await prisma.show.findUnique({
+    where: { id: showId },
+    select: {
+      status: true,
+      episodes: { select: { title: true, airDate: true } },
+      externalIds: { where: { provider: "tmdb", entityType: "SHOW" } },
+    },
+  });
+  if (!show || ENDED_STATUSES.has(show.status)) return false;
+
+  const tmdbId = show.externalIds[0];
+  if (!tmdbId) return false;
+
+  const now = Date.now();
+  const hasStalePlaceholder = show.episodes.some(
+    (ep) => ep.airDate !== null && ep.airDate.getTime() <= now && PLACEHOLDER_TITLE.test(ep.title)
+  );
+  if (!hasStalePlaceholder) return false;
+
+  if (tmdbId.lastSyncedAt && now - tmdbId.lastSyncedAt.getTime() < REFRESH_COOLDOWN_MS) return false;
+
+  console.log(`[metadata] refreshing stale episode titles for show ${showId} from tmdb`);
+  await ensureShowSynced("tmdb", tmdbId.externalId, { forceRefresh: true });
+  return true;
 }

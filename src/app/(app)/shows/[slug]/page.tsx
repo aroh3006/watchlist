@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { refreshShowIfStale } from "@/lib/metadata/sync";
 import { ShowActions } from "@/components/ShowActions";
 import { BackButton } from "@/components/BackButton";
 import { AddToListButton } from "@/components/AddToListButton";
@@ -23,6 +24,15 @@ export default async function ShowDetailPage({ params }: { params: { slug: strin
     },
   });
   if (!show) notFound();
+
+  const refreshed = await refreshShowIfStale(show.id);
+  if (refreshed) {
+    show.seasons = await prisma.season.findMany({
+      where: { showId: show.id },
+      include: { episodes: { orderBy: { episodeNumber: "asc" } } },
+      orderBy: { seasonNumber: "asc" },
+    });
+  }
 
   const [userShow, favorite, rating, watchedEpisodes] = await Promise.all([
     prisma.userShow.findUnique({ where: { userId_showId: { userId: user.id, showId: show.id } } }),
