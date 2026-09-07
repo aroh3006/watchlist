@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useEffect, useRef } from "react";
 import {
   HomeIcon,
   TvIcon,
@@ -37,10 +38,19 @@ const MOBILE_ITEMS = [
 
 export default function AppShell({ children, username }: { children: ReactNode; username: string }) {
   const pathname = usePathname();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // The sidebar lives outside the scrollable content area now, so route
+  // navigation no longer resets scroll position on its own (that used to be
+  // the browser scrolling the whole page back to the top). Do it by hand so
+  // a new page doesn't open already scrolled down.
+  useEffect(() => {
+    scrollRef.current?.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
-    <div className="min-h-screen flex bg-bg text-ink">
-      <aside className="hidden md:flex md:flex-col w-72 shrink-0 border-r border-border bg-bg-raised px-5 py-7">
+    <div className="h-screen flex bg-bg text-ink overflow-hidden">
+      <aside className="hidden md:flex md:flex-col w-72 shrink-0 h-screen overflow-y-auto border-r border-border bg-bg-raised px-5 py-7">
         <Link href="/" className="flex items-center gap-2.5 px-1 mb-10 focus-ring rounded">
           <span className="w-9 h-9 rounded-lg bg-bg-overlay border border-border-subtle flex items-center justify-center text-brand-300">
             <Logo className="w-7 h-7" />
@@ -77,7 +87,7 @@ export default function AppShell({ children, username }: { children: ReactNode; 
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div ref={scrollRef} className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto">
         <main className="flex-1 pb-20 md:pb-0">{children}</main>
       </div>
 
