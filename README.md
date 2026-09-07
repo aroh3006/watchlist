@@ -33,9 +33,8 @@ design, and data architecture.
   formula-injection protection on every exported cell.
 - **Auth**: email/username + password (NextAuth credentials), per-user data isolation enforced
   at the query layer.
-- **Light/dark mode**: a manual toggle in the sidebar and on the Profile page, defaulting to the
-  OS-level preference on a first visit with no stored choice, and remembering whatever the user
-  picks after that.
+- **Light/dark mode**: a manual toggle in the sidebar and on the Profile page, starting light on
+  a first visit with no stored choice, and remembering whatever the user picks after that.
 - **Tests**: Vitest unit tests (CSV parsing, ZIP zip-slip protection, field mapping, streak math,
   timezone date-keying, badge rules, CSV export sanitization) plus integration tests against the
   real Prisma/SQLite client for watch tracking and idempotency.

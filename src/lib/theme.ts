@@ -20,12 +20,11 @@ export function getCurrentTheme(): Theme {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-// Resolves the theme the same way the blocking init script does (stored
-// choice, else OS preference), without touching storage.
+// Resolves the theme the same way the blocking init script does: the
+// stored choice if there is one, light otherwise. No OS preference here on
+// purpose, a first visit with nothing stored always starts light.
 export function resolveTheme(): Theme {
-  const stored = getStoredTheme();
-  if (stored) return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return getStoredTheme() ?? "light";
 }
 
 export function applyThemeClass(theme: Theme) {
@@ -46,13 +45,13 @@ export function setTheme(theme: Theme) {
 // The exact logic the blocking inline script in the root layout runs before
 // hydration, kept here too so anything that needs to compute it client-side
 // (none of the app does today, this is just the one source of truth) agrees
-// with what already ran.
+// with what already ran. A first visit with no stored choice always starts
+// light, the OS preference is never consulted.
 export const THEME_INIT_SCRIPT = `
 (function() {
   try {
     var stored = localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});
-    var dark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (dark) document.documentElement.classList.add("dark");
+    if (stored === "dark") document.documentElement.classList.add("dark");
   } catch (e) {}
 })();
 `;

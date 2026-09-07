@@ -53,7 +53,10 @@ export default function AppShell({ children, username }: { children: ReactNode; 
     <div className="h-screen flex bg-bg text-ink overflow-hidden">
       <aside className="hidden md:flex md:flex-col w-72 shrink-0 h-screen overflow-y-auto border-r border-border bg-bg-raised px-5 py-7">
         <Link href="/" className="flex items-center gap-2.5 px-1 mb-10 focus-ring rounded">
-          <span className="w-9 h-9 rounded-lg bg-bg-overlay border border-border-subtle flex items-center justify-center text-brand-300">
+          {/* Hardcoded rather than theme tokens on purpose, the mark keeps its
+              one look in both themes instead of picking up dark mode's
+              colors. */}
+          <span className="w-9 h-9 rounded-lg bg-[#ece4d1] border border-[#e6dfc9] flex items-center justify-center">
             <Logo className="w-7 h-7" />
           </span>
           <span className="font-display font-semibold text-xl tracking-tight">Watchlist</span>
