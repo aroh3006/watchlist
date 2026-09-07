@@ -11,16 +11,112 @@
   }
 }
 
-html {
+/* Warm paper/cream, editorial print feel, not a generic light demo panel.
+   Every value here is an "R G B" triple (no rgb() wrapper) so Tailwind's
+   rgb(var(--x) / <alpha-value>) color functions in tailwind.config.ts can
+   apply opacity modifiers like bg-brand-900/30 on top of them. */
+:root {
   color-scheme: light;
+
+  --color-bg: 243 237 224;
+  --color-bg-raised: 250 247 238;
+  --color-bg-overlay: 236 228 209;
+
+  --color-border: 217 208 184;
+  --color-border-subtle: 230 223 201;
+
+  --color-ink: 28 26 21;
+  --color-ink-muted: 111 103 84;
+  --color-ink-faint: 163 154 130;
+
+  --color-brand-50: 234 241 247;
+  --color-brand-100: 205 223 236;
+  --color-brand-200: 143 178 207;
+  --color-brand-300: 61 102 144;
+  --color-brand-400: 47 82 115;
+  --color-brand-500: 40 75 104;
+  --color-brand-600: 31 58 82;
+  --color-brand-700: 24 45 64;
+  --color-brand-800: 18 33 47;
+  --color-brand-900: 13 24 34;
+
+  --color-accent: 161 68 43;
+  --color-accent-muted: 122 51 32;
+
+  /* Errors, warnings, and destructive actions. Same warm rust as accent
+     here, they used to be the same token, kept identical in light mode and
+     only pulled apart so dark mode can send them in different directions. */
+  --color-danger: 161 68 43;
+  --color-danger-muted: 122 51 32;
+
+  --color-activity-0: 230 221 199;
+  --color-activity-1: 185 208 221;
+  --color-activity-2: 135 171 196;
+  --color-activity-3: 77 124 158;
+  --color-activity-4: 31 58 82;
+
+  --color-scrollbar-thumb: 217 208 184;
+  --color-skeleton-a: 236 228 209;
+  --color-skeleton-b: 224 215 191;
+}
+
+/* Cool neutral slate, deliberately not a dark version of the cream above,
+   no warm/amber undertone in the background or card surfaces. The brand
+   ramp becomes a muted blue here, used for links, selected states, and
+   favorites in place of the warm accent. */
+.dark {
+  color-scheme: dark;
+
+  --color-bg: 21 23 26;
+  --color-bg-raised: 28 31 35;
+  --color-bg-overlay: 35 38 44;
+
+  --color-border: 42 45 50;
+  --color-border-subtle: 34 37 42;
+
+  --color-ink: 231 233 236;
+  --color-ink-muted: 138 143 152;
+  --color-ink-faint: 94 99 107;
+
+  --color-brand-50: 231 237 247;
+  --color-brand-100: 199 214 234;
+  --color-brand-200: 155 180 217;
+  --color-brand-300: 123 155 203;
+  --color-brand-400: 92 128 184;
+  --color-brand-500: 61 98 160;
+  --color-brand-600: 47 74 128;
+  --color-brand-700: 38 60 105;
+  --color-brand-800: 30 47 82;
+  --color-brand-900: 23 37 63;
+
+  --color-accent: 61 98 160;
+  --color-accent-muted: 47 74 128;
+
+  /* Errors and destructive actions stay warm red here on purpose, a red
+     accent reads as an error in any theme, a blue one would not. */
+  --color-danger: 224 101 74;
+  --color-danger-muted: 184 80 58;
+
+  --color-activity-0: 34 37 42;
+  --color-activity-1: 42 58 82;
+  --color-activity-2: 58 90 138;
+  --color-activity-3: 82 122 181;
+  --color-activity-4: 123 165 224;
+
+  --color-scrollbar-thumb: 42 45 50;
+  --color-skeleton-a: 35 38 44;
+  --color-skeleton-b: 45 49 55;
+}
+
+html {
   /* A deliberate bump so text and rem-based spacing both read larger and
      roomier without having to touch every component's size utility. */
   font-size: 118%;
 }
 
 body {
-  background-color: #f3ede0;
-  color: #1c1a15;
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-ink));
 }
 
 h1, h2, h3, .font-display {
@@ -34,8 +130,8 @@ h1, h2, h3, .font-display {
    Texture, not decoration. */
 .grid-texture {
   background-image:
-    linear-gradient(to right, rgba(28, 26, 21, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(28, 26, 21, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgb(var(--color-ink) / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--color-ink) / 0.05) 1px, transparent 1px);
   background-size: 42px 42px;
 }
 
@@ -55,12 +151,12 @@ h1, h2, h3, .font-display {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d9d0b8;
+  background: rgb(var(--color-scrollbar-thumb));
   border-radius: 999px;
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #ece4d1 25%, #e0d7bf 37%, #ece4d1 63%);
+  background: linear-gradient(90deg, rgb(var(--color-skeleton-a)) 25%, rgb(var(--color-skeleton-b)) 37%, rgb(var(--color-skeleton-a)) 63%);
   background-size: 400% 100%;
   animation: skeleton-loading 1.4s ease infinite;
 }
@@ -70,6 +166,6 @@ h1, h2, h3, .font-display {
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid #284b68;
+  outline: 2px solid rgb(var(--color-brand-500));
   outline-offset: 2px;
 }

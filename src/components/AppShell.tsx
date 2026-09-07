@@ -15,6 +15,7 @@ import {
   UserIcon,
 } from "./icons";
 import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 import type { ReactNode } from "react";
 
 const NAV_ITEMS = [
@@ -76,14 +77,17 @@ export default function AppShell({ children, username }: { children: ReactNode; 
             );
           })}
         </nav>
-        <div className="mt-auto pt-5 border-t border-border-subtle flex items-center justify-between">
+        <div className="mt-auto pt-5 border-t border-border-subtle flex items-center justify-between gap-2">
           <span className="text-sm text-ink-muted truncate">@{username}</span>
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="text-xs text-ink-faint hover:text-ink focus-ring rounded px-2 py-1"
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <ThemeToggle />
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="text-xs text-ink-faint hover:text-ink focus-ring rounded px-2 py-1"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
 

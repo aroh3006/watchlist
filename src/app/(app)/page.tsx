@@ -5,6 +5,7 @@ import { recommendShows, recommendMovies } from "@/lib/recommendations";
 import { Section, EmptyState } from "@/components/Section";
 import { PosterCard, PosterRow } from "@/components/PosterCard";
 import { NextEpisodeCard, type NextEpisodeCardData } from "@/components/NextEpisodeCard";
+import { formatDate } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -121,7 +122,7 @@ export default async function HomePage() {
                 href={`/shows/${ep.season.show.slug}`}
                 title={ep.season.show.title}
                 posterUrl={ep.season.show.posterUrl}
-                subtitle={`S${ep.season.seasonNumber}E${ep.episodeNumber} · ${ep.airDate?.toLocaleDateString()}`}
+                subtitle={`S${ep.season.seasonNumber}E${ep.episodeNumber} · ${ep.airDate ? formatDate(ep.airDate) : ""}`}
                 badge={extra > 0 ? `+${extra}` : undefined}
               />
             ))}
@@ -131,7 +132,7 @@ export default async function HomePage() {
                 href={`/movies/${m.slug}`}
                 title={m.title}
                 posterUrl={m.posterUrl}
-                subtitle={m.releaseDate?.toLocaleDateString()}
+                subtitle={m.releaseDate ? formatDate(m.releaseDate) : undefined}
               />
             ))}
           </PosterRow>

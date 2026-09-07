@@ -66,7 +66,7 @@ function LoginForm() {
           />
         </div>
         {error && (
-          <p role="alert" className="text-sm text-accent">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}

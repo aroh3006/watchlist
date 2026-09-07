@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { CheckCircleIcon } from "./icons";
 import { SafeImage } from "./SafeImage";
+import { formatDate } from "@/lib/time";
 
 export interface EpisodeRowData {
   id: string;
@@ -135,7 +136,7 @@ function EpisodeRow({
             {ep.episodeNumber}. {ep.title}
           </p>
           <p className="text-xs text-ink-muted truncate">
-            {ep.airDate ? new Date(ep.airDate).toLocaleDateString() : "TBA"}
+            {ep.airDate ? formatDate(ep.airDate) : "TBA"}
             {ep.runtime ? ` · ${ep.runtime}m` : ""}
           </p>
         </div>

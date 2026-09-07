@@ -60,7 +60,7 @@ export default function RegisterPage() {
           <input id="password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-lg bg-bg border border-border px-3 py-2 text-sm focus-ring" autoComplete="new-password" />
         </div>
-        {error && <p role="alert" className="text-sm text-accent">{error}</p>}
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <button type="submit" disabled={loading}
           className="w-full rounded-lg bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-medium py-2 text-sm transition-colors focus-ring">
           {loading ? "Creating account..." : "Create account"}

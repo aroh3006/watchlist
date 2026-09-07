@@ -20,7 +20,11 @@ const LABEL_COLUMN_WIDTH = 28; // px, width reserved for the weekday labels
 
 function cellLabel(cell: HeatmapCell): string {
   const date = new Date(cell.date + "T00:00:00Z");
-  const dateStr = date.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+  // A fixed locale, not undefined, the server and a visiting browser can
+  // otherwise resolve "undefined" to different locales and disagree on the
+  // exact string (day-before-month order, punctuation), which is a
+  // hydration mismatch since this is a client component.
+  const dateStr = date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
   if (cell.episodeCount === 0 && cell.movieCount === 0) return `${dateStr}: no watching activity.`;
   const parts: string[] = [];
   if (cell.episodeCount > 0) parts.push(`${cell.episodeCount} episode${cell.episodeCount !== 1 ? "s" : ""}`);

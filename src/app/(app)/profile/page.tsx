@@ -4,6 +4,7 @@ import { getHeatmapData } from "@/lib/stats/heatmap";
 import { ContributionHeatmap } from "@/components/ContributionHeatmap";
 import { HeatmapRangeSelector } from "@/components/HeatmapRangeSelector";
 import { TimezoneSelector } from "@/components/TimezoneSelector";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { PosterRow, PosterCard } from "@/components/PosterCard";
 import { EmptyState } from "@/components/Section";
@@ -43,13 +44,17 @@ export default async function ProfilePage({ searchParams }: { searchParams: { ra
         <div>
           <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">{user.profile.displayName ?? user.name}</h1>
           <p className="text-sm text-ink-muted">
-            @{user.name} · Joined {dbUser.createdAt.toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+            @{user.name} · Joined {dbUser.createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
           </p>
           {user.profile.bio && <p className="text-sm text-ink-muted mt-1 max-w-md">{user.profile.bio}</p>}
         </div>
         <div className="ml-auto">
           <TimezoneSelector current={user.profile.timezone} />
         </div>
+      </div>
+
+      <div className="mb-8 max-w-xs">
+        <ThemeToggle variant="row" />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

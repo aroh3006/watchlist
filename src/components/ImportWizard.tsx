@@ -134,7 +134,7 @@ export function ImportWizard() {
 
   if (error) {
     return (
-      <div className="rounded-xl2 border border-accent/40 bg-accent/5 p-6">
+      <div className="rounded-xl2 border border-danger/40 bg-danger/5 p-6">
         <h2 className="font-semibold text-lg mb-2">Import failed</h2>
         <p className="text-sm text-ink-muted mb-4">{error}</p>
         <button
@@ -278,7 +278,7 @@ export function ImportWizard() {
           }}
         />
       </div>
-      {error && <p role="alert" className="text-sm text-accent mt-3">{error}</p>}
+      {error && <p role="alert" className="text-sm text-danger mt-3">{error}</p>}
     </div>
   );
 }

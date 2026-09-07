@@ -30,12 +30,12 @@ function Wave() {
     >
       <path
         d="M0 38 C 18 30, 30 46, 48 40 S 78 26, 100 34 L100 100 L0 100 Z"
-        fill="#cddfec"
+        className="fill-brand-100"
         opacity="0.9"
       />
       <path
         d="M0 52 C 22 46, 34 60, 55 54 S 82 44, 100 50 L100 100 L0 100 Z"
-        fill="#8fb2cf"
+        className="fill-brand-200"
         opacity="0.55"
       />
     </svg>

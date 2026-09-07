@@ -80,7 +80,7 @@ export default async function UpcomingPage() {
           {Array.from(grouped.entries()).map(([dateKey, group]) => (
             <div key={dateKey}>
               <p className="text-xs font-semibold text-ink-muted uppercase tracking-wide mb-2">
-                {new Date(dateKey).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} ·{" "}
+                {new Date(dateKey).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} ·{" "}
                 {daysUntil(new Date(dateKey))}
               </p>
               <ul className="space-y-2">

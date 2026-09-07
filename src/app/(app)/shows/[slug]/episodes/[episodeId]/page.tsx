@@ -8,6 +8,7 @@ import { EpisodeWatchToggle } from "@/components/EpisodeWatchToggle";
 import { BackButton } from "@/components/BackButton";
 import { SafeImage } from "@/components/SafeImage";
 import type { ReactionType } from "@/lib/constants";
+import { formatDate } from "@/lib/time";
 
 export default async function EpisodeDetailPage({ params }: { params: { slug: string; episodeId: string } }) {
   const user = await requireUser();
@@ -58,7 +59,7 @@ export default async function EpisodeDetailPage({ params }: { params: { slug: st
           </p>
           <h1 className="text-xl md:text-2xl font-bold mt-1">{episode.title}</h1>
           <p className="text-xs text-ink-muted mt-1">
-            {episode.airDate ? new Date(episode.airDate).toLocaleDateString() : "Air date TBA"}
+            {episode.airDate ? formatDate(episode.airDate) : "Air date TBA"}
             {episode.runtime ? ` · ${episode.runtime}m` : ""}
             {episode.voteAverage ? ` · ★ ${episode.voteAverage.toFixed(1)}` : ""}
           </p>

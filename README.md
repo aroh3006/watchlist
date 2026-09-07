@@ -33,6 +33,9 @@ design, and data architecture.
   formula-injection protection on every exported cell.
 - **Auth**: email/username + password (NextAuth credentials), per-user data isolation enforced
   at the query layer.
+- **Light/dark mode**: a manual toggle in the sidebar and on the Profile page, defaulting to the
+  OS-level preference on a first visit with no stored choice, and remembering whatever the user
+  picks after that.
 - **Tests**: Vitest unit tests (CSV parsing, ZIP zip-slip protection, field mapping, streak math,
   timezone date-keying, badge rules, CSV export sanitization) plus integration tests against the
   real Prisma/SQLite client for watch tracking and idempotency.
@@ -42,7 +45,8 @@ design, and data architecture.
 - **Next.js 14** (App Router) + **TypeScript**
 - **Prisma** + **SQLite** for local dev (swap `DATABASE_URL` to Postgres for production, the
   schema avoids native enums specifically so this swap needs no code changes)
-- **Tailwind CSS**, an original dark-first design system (no TV Time visual assets)
+- **Tailwind CSS**, an original design system with light and dark themes (no TV Time visual
+  assets)
 - **NextAuth** (credentials provider)
 - **Vitest** for unit/integration tests
 - No external metadata API is required to run the app. See below.

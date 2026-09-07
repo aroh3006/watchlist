@@ -110,3 +110,12 @@ export const TrophyIcon = (p: IconProps) =>
 export const ArrowLeftIcon = (p: IconProps) => base(<path d="M19 12H5M11 18l-6-6 6-6" />, p);
 export const XIcon = (p: IconProps) => base(<path d="M18 6 6 18M6 6l12 12" />, p);
 export const MenuIcon = (p: IconProps) => base(<path d="M4 6h16M4 12h16M4 18h16" />, p);
+export const SunIcon = (p: IconProps) =>
+  base(
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </>,
+    p
+  );
+export const MoonIcon = (p: IconProps) => base(<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" />, p);

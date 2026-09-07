@@ -42,3 +42,16 @@ export function keysBetween(startKey: string, endKey: string): string[] {
 export function daysAgoKey(days: number, timeZone: string): string {
   return addDaysToKey(todayKeyInTimezone(timeZone), -days);
 }
+
+/**
+ * Deterministic date-only display formatting (e.g. an episode air date or a
+ * movie release date). Plain `toLocaleDateString()` with no locale or
+ * timeZone resolves against whatever locale/timezone the current runtime
+ * happens to have, which differs between the server and a visiting
+ * browser. For anything rendered by a client component that is exactly
+ * the kind of mismatch that makes React throw away the server-rendered
+ * page and rebuild it from scratch on the client.
+ */
+export function formatDate(date: Date | string): string {
+  return new Date(date).toLocaleDateString("en-US", { timeZone: "UTC" });
+}
