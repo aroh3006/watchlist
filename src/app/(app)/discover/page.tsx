@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/session";
 import { getMetadataProvider } from "@/lib/metadata";
 import { prisma } from "@/lib/prisma";
 import { DiscoverCard } from "@/components/DiscoverCard";
+import { DiscoverSearchInput } from "@/components/DiscoverSearchInput";
 import { PosterCard, PosterRow } from "@/components/PosterCard";
 import { Section, EmptyState } from "@/components/Section";
 
@@ -45,15 +46,7 @@ export default async function DiscoverPage({ searchParams }: { searchParams: { q
     <div className="py-6 md:py-8">
       <div className="px-4 md:px-8 mb-6">
         <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight mb-4">Discover</h1>
-        <form action="/discover" className="max-w-lg">
-          <input
-            type="search"
-            name="q"
-            defaultValue={query}
-            placeholder="Search shows, movies, actors, characters..."
-            className="w-full rounded-lg bg-bg-overlay border border-border px-4 py-2.5 text-sm focus-ring"
-          />
-        </form>
+        <DiscoverSearchInput defaultValue={query} />
         <div className="flex gap-2 overflow-x-auto mt-10 pb-3">
           <Link
             href="/discover"
