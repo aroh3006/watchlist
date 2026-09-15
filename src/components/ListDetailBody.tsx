@@ -38,11 +38,13 @@ export function ListDetailBody({
             aria-pressed={editMode}
             aria-label={editMode ? "Done editing this list" : "Edit this list"}
             title={editMode ? "Done editing" : "Edit list"}
-            className={`rounded-lg p-2 transition-colors focus-ring ${
-              editMode ? "text-brand-500 bg-bg-overlay" : "text-ink-faint hover:text-ink hover:bg-bg-overlay"
+            className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-colors focus-ring ${
+              editMode
+                ? "bg-brand-500 border-brand-500 text-white"
+                : "border-border bg-bg-overlay text-ink-muted hover:text-ink hover:border-brand-400"
             }`}
           >
-            <PencilIcon width={18} height={18} />
+            <PencilIcon width={16} height={16} />
           </button>
           <DeleteListButton listId={listId} />
         </div>

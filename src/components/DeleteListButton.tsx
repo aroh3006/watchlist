@@ -24,9 +24,9 @@ export function DeleteListButton({ listId }: { listId: string }) {
         onClick={() => setConfirming(true)}
         aria-label="Delete list"
         title="Delete list"
-        className="rounded-lg p-2 text-ink-faint hover:text-danger hover:bg-bg-overlay transition-colors focus-ring"
+        className="w-9 h-9 rounded-lg border border-border bg-bg-overlay flex items-center justify-center text-ink-muted hover:text-danger hover:border-danger transition-colors focus-ring"
       >
-        <TrashIcon width={18} height={18} />
+        <TrashIcon width={16} height={16} />
       </button>
       {confirming && (
         <ConfirmModal
