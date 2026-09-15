@@ -11,6 +11,7 @@ import { PosterRow, PosterCard } from "@/components/PosterCard";
 import { SafeImage } from "@/components/SafeImage";
 import { Section } from "@/components/Section";
 import { SHOW_STATUS_LABEL, type ShowStatus } from "@/lib/constants";
+import { formatDate } from "@/lib/time";
 
 export default async function ShowDetailPage({ params }: { params: { slug: string } }) {
   const user = await requireUser();
@@ -34,11 +35,15 @@ export default async function ShowDetailPage({ params }: { params: { slug: strin
     });
   }
 
-  const [userShow, favorite, rating, watchedEpisodes] = await Promise.all([
+  const [userShow, favorite, rating, watchedEpisodes, mostRecentWatch] = await Promise.all([
     prisma.userShow.findUnique({ where: { userId_showId: { userId: user.id, showId: show.id } } }),
     prisma.favorite.findFirst({ where: { userId: user.id, targetType: "SHOW", showId: show.id, movieId: null } }),
     prisma.rating.findFirst({ where: { userId: user.id, targetType: "SHOW", showId: show.id, episodeId: null, movieId: null } }),
     prisma.episodeWatch.findMany({ where: { userId: user.id, episode: { showId: show.id } }, select: { episodeId: true } }),
+    // "Completed on" for a show means the day its last episode was watched,
+    // not the day the first one was, so this needs the most recent event
+    // across the whole show, not just any watch.
+    prisma.episodeWatch.findFirst({ where: { userId: user.id, episode: { showId: show.id } }, orderBy: { watchedAt: "desc" } }),
   ]);
 
   const watchedIds = new Set(watchedEpisodes.map((w) => w.episodeId));
@@ -108,6 +113,9 @@ export default async function ShowDetailPage({ params }: { params: { slug: strin
             />
             <AddToListButton showId={show.id} />
           </div>
+          {userShow?.status === "COMPLETED" && mostRecentWatch && (
+            <p className="text-xs text-ink-faint mt-2">Completed {formatDate(mostRecentWatch.watchedAt)}</p>
+          )}
         </div>
       </div>
 

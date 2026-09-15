@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { CheckCircleIcon } from "./icons";
 import { SafeImage } from "./SafeImage";
+import { WatchDateEditor } from "./WatchDateEditor";
 import { formatDate } from "@/lib/time";
 
 export interface EpisodeRowData {
@@ -32,11 +33,24 @@ export function EpisodeList({ showSlug, seasons }: { showSlug: string; seasons: 
   const [, startTransition] = useTransition();
   const season = seasons.find((s) => s.id === activeSeason) ?? seasons[0];
 
+  // Episode id -> the watch row just created for it in this page session,
+  // so its date can still be corrected. Shared across the season button and
+  // every row, since either one can create watches for other rows (mark
+  // season watched, or "mark earlier episodes too").
+  const [justWatched, setJustWatched] = useState<Record<string, string>>({});
+  function recordJustWatched(pairs: [string, string][]) {
+    setJustWatched((prev) => ({ ...prev, ...Object.fromEntries(pairs) }));
+  }
+
   async function markSeason() {
     if (!season) return;
     setMarking(true);
-    await fetch(`/api/seasons/${season.id}/watch`, { method: "POST" });
+    const res = await fetch(`/api/seasons/${season.id}/watch`, { method: "POST" });
+    const data = await res.json();
     setMarking(false);
+    if (Array.isArray(data.watches)) {
+      recordJustWatched(data.watches.map((w: { id: string; episodeId: string }) => [w.episodeId, w.id]));
+    }
     startTransition(() => router.refresh());
   }
 
@@ -61,14 +75,22 @@ export function EpisodeList({ showSlug, seasons }: { showSlug: string; seasons: 
             </button>
           ))}
         </div>
-        <button
-          onClick={markSeason}
-          disabled={marking}
-          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white transition-colors focus-ring"
-        >
-          <CheckCircleIcon width={14} height={14} />
-          {marking ? "Marking..." : "Mark season watched"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={markSeason}
+            disabled={marking}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white transition-colors focus-ring"
+          >
+            <CheckCircleIcon width={14} height={14} />
+            {marking ? "Marking..." : "Mark season watched"}
+          </button>
+          {season.episodes.some((e) => justWatched[e.id]) && (
+            <WatchDateEditor
+              kind="episode"
+              watchIds={season.episodes.map((e) => justWatched[e.id]).filter((id): id is string => !!id)}
+            />
+          )}
+        </div>
       </div>
 
       <ul className="divide-y divide-border-subtle rounded-xl2 border border-border-subtle overflow-hidden">
@@ -76,7 +98,16 @@ export function EpisodeList({ showSlug, seasons }: { showSlug: string; seasons: 
           const flatEpisodes = seasons.flatMap((s) => s.episodes);
           const flatIndex = flatEpisodes.findIndex((e) => e.id === ep.id);
           const previousUnwatchedIds = flatEpisodes.slice(0, flatIndex).filter((e) => !e.watched).map((e) => e.id);
-          return <EpisodeRow key={ep.id} showSlug={showSlug} ep={ep} previousUnwatchedIds={previousUnwatchedIds} />;
+          return (
+            <EpisodeRow
+              key={ep.id}
+              showSlug={showSlug}
+              ep={ep}
+              previousUnwatchedIds={previousUnwatchedIds}
+              justWatchedId={justWatched[ep.id] ?? null}
+              onWatched={recordJustWatched}
+            />
+          );
         })}
       </ul>
     </div>
@@ -87,10 +118,14 @@ function EpisodeRow({
   showSlug,
   ep,
   previousUnwatchedIds,
+  justWatchedId,
+  onWatched,
 }: {
   showSlug: string;
   ep: EpisodeRowData;
   previousUnwatchedIds: string[];
+  justWatchedId: string | null;
+  onWatched: (pairs: [string, string][]) => void;
 }) {
   const router = useRouter();
   const [watched, setWatched] = useState(ep.watched);
@@ -105,7 +140,10 @@ function EpisodeRow({
   async function markIds(ids: string[]) {
     setWatched(true);
     startTransition(async () => {
-      await Promise.all(ids.map((id) => fetch(`/api/episodes/${id}/watch`, { method: "POST" })));
+      const created = await Promise.all(
+        ids.map((id) => fetch(`/api/episodes/${id}/watch`, { method: "POST" }).then((r) => r.json()))
+      );
+      onWatched(ids.map((id, i) => [id, created[i].id]));
       router.refresh();
     });
   }
@@ -141,6 +179,7 @@ function EpisodeRow({
           </p>
         </div>
       </Link>
+      {watched && justWatchedId && <WatchDateEditor kind="episode" watchIds={[justWatchedId]} />}
       <button
         onClick={toggle}
         disabled={pending}

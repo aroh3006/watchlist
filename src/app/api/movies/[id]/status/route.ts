@@ -8,9 +8,9 @@ import { prisma } from "@/lib/prisma";
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireUser();
-    const { status } = await req.json();
+    const { status, watchedAt } = await req.json();
     if (!WATCH_STATUSES.includes(status)) throw new ApiError("Invalid status");
-    const result = await setMovieStatus(user.id, params.id, status);
+    const result = await setMovieStatus(user.id, params.id, status, watchedAt ? new Date(watchedAt) : new Date());
     return NextResponse.json(result);
   } catch (err) {
     return handleApiError(err, "Could not update movie status.");

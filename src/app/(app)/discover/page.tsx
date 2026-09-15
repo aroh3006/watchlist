@@ -70,20 +70,29 @@ export default async function DiscoverPage({ searchParams }: { searchParams: { q
         </div>
       </div>
 
-      {query && (
+      {query && searchShows.length === 0 && searchMovies.length === 0 && (
         <Section title={`Results for "${query}"`}>
-          {searchShows.length === 0 && searchMovies.length === 0 ? (
-            <EmptyState title="No results" body="Try a different title, genre, or actor name." />
-          ) : (
-            <PosterRow>
-              {searchShows.map((s) => (
-                <DiscoverCard key={s.externalId} title={s.title} posterUrl={s.posterUrl} subtitle="Show" type="show" provider={s.provider} externalId={s.externalId} />
-              ))}
-              {searchMovies.map((m) => (
-                <DiscoverCard key={m.externalId} title={m.title} posterUrl={m.posterUrl} subtitle="Movie" type="movie" provider={m.provider} externalId={m.externalId} />
-              ))}
-            </PosterRow>
-          )}
+          <EmptyState title="No results" body="Try a different title, genre, or actor name." />
+        </Section>
+      )}
+
+      {query && searchShows.length > 0 && (
+        <Section title="Shows" eyebrow={`Results for "${query}"`}>
+          <PosterRow>
+            {searchShows.map((s) => (
+              <DiscoverCard key={s.externalId} title={s.title} posterUrl={s.posterUrl} subtitle="Show" type="show" provider={s.provider} externalId={s.externalId} />
+            ))}
+          </PosterRow>
+        </Section>
+      )}
+
+      {query && searchMovies.length > 0 && (
+        <Section title="Movies" eyebrow={searchShows.length === 0 ? `Results for "${query}"` : undefined}>
+          <PosterRow>
+            {searchMovies.map((m) => (
+              <DiscoverCard key={m.externalId} title={m.title} posterUrl={m.posterUrl} subtitle="Movie" type="movie" provider={m.provider} externalId={m.externalId} />
+            ))}
+          </PosterRow>
         </Section>
       )}
 

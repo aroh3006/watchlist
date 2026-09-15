@@ -42,27 +42,30 @@ export async function unmarkEpisodeWatched(userId: string, episodeId: string) {
   await afterWatchChange(userId);
 }
 
-export async function markSeasonWatched(userId: string, seasonId: string) {
+export async function markSeasonWatched(userId: string, seasonId: string, watchedAt: Date = new Date()) {
   const season = await prisma.season.findUniqueOrThrow({ where: { id: seasonId }, include: { episodes: true } });
   const existing = await prisma.episodeWatch.findMany({
     where: { userId, episodeId: { in: season.episodes.map((e) => e.id) } },
     select: { episodeId: true },
   });
   const watchedIds = new Set(existing.map((e) => e.episodeId));
-  const now = new Date();
+  const base = watchedAt.getTime();
 
-  await prisma.$transaction(
+  const created = await prisma.$transaction(
     season.episodes
       .filter((e) => !watchedIds.has(e.id))
       .map((e, i) => {
-        const watchedAt = new Date(now.getTime() + i);
+        // Every episode in the batch gets the same chosen date, offset by a
+        // few milliseconds only so each row's watchedAt and dedupeKey stay
+        // distinct, not to spread them across different calendar days.
+        const at = new Date(base + i);
         return prisma.episodeWatch.create({
           data: {
             userId,
             episodeId: e.id,
-            watchedAt,
+            watchedAt: at,
             source: "manual",
-            dedupeKey: stableDedupeKey([userId, "episode", e.id, watchedAt.toISOString(), "manual-season"]),
+            dedupeKey: stableDedupeKey([userId, "episode", e.id, at.toISOString(), "manual-season"]),
           },
         });
       })
@@ -75,6 +78,7 @@ export async function markSeasonWatched(userId: string, seasonId: string) {
   });
   await maybeCompleteShow(userId, season.showId);
   await afterWatchChange(userId);
+  return created;
 }
 
 export async function markShowWatched(userId: string, showId: string) {
@@ -142,6 +146,20 @@ export async function unmarkMovieWatched(userId: string, movieId: string) {
   await afterWatchChange(userId);
 }
 
+// Backdating support: lets a just-created watch event's date be corrected
+// right after marking something watched, scoped to the ids the caller just
+// created (never used to reach back into older history). userId is part of
+// the where clause so one user can never retarget another's watch rows.
+export async function updateEpisodeWatchesDate(userId: string, watchIds: string[], watchedAt: Date) {
+  await prisma.episodeWatch.updateMany({ where: { id: { in: watchIds }, userId }, data: { watchedAt } });
+  await afterWatchChange(userId);
+}
+
+export async function updateMovieWatchDate(userId: string, watchId: string, watchedAt: Date) {
+  await prisma.movieWatch.updateMany({ where: { id: watchId, userId }, data: { watchedAt } });
+  await afterWatchChange(userId);
+}
+
 export async function setShowStatus(userId: string, showId: string, status: string) {
   return prisma.userShow.upsert({
     where: { userId_showId: { userId, showId } },
@@ -150,7 +168,7 @@ export async function setShowStatus(userId: string, showId: string, status: stri
   });
 }
 
-export async function setMovieStatus(userId: string, movieId: string, status: string) {
+export async function setMovieStatus(userId: string, movieId: string, status: string, watchedAt: Date = new Date()) {
   const existing = await prisma.userMovie.findUnique({ where: { userId_movieId: { userId, movieId } } });
   const becameCompleted = status === "COMPLETED" && existing?.status !== "COMPLETED";
 
@@ -163,14 +181,15 @@ export async function setMovieStatus(userId: string, movieId: string, status: st
   // The status picker is the only place most users mark a movie completed,
   // so it needs to record the same MovieWatch event markMovieWatched does.
   // Without this, the movie never shows up in stats or the activity heatmap.
+  let movieWatchId: string | null = null;
   if (becameCompleted) {
-    const watchedAt = new Date();
     const dedupeKey = stableDedupeKey([userId, "movie", movieId, watchedAt.toISOString(), "status-change"]);
-    await prisma.movieWatch.create({ data: { userId, movieId, watchedAt, source: "status-change", dedupeKey } });
+    const watch = await prisma.movieWatch.create({ data: { userId, movieId, watchedAt, source: "status-change", dedupeKey } });
+    movieWatchId = watch.id;
     await afterWatchChange(userId);
   }
 
-  return result;
+  return { ...result, movieWatchId };
 }
 
 // SQLite's Prisma connector rejects `null` inside a composite-unique

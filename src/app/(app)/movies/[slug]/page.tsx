@@ -9,6 +9,7 @@ import { PosterRow, PosterCard } from "@/components/PosterCard";
 import { SafeImage } from "@/components/SafeImage";
 import { Section } from "@/components/Section";
 import type { ReactionType } from "@/lib/constants";
+import { formatDate } from "@/lib/time";
 
 export default async function MovieDetailPage({ params }: { params: { slug: string } }) {
   const user = await requireUser();
@@ -25,7 +26,9 @@ export default async function MovieDetailPage({ params }: { params: { slug: stri
     prisma.userMovie.findUnique({ where: { userId_movieId: { userId: user.id, movieId: movie.id } } }),
     prisma.favorite.findFirst({ where: { userId: user.id, targetType: "MOVIE", showId: null, movieId: movie.id } }),
     prisma.rating.findFirst({ where: { userId: user.id, targetType: "MOVIE", showId: null, episodeId: null, movieId: movie.id } }),
-    prisma.movieWatch.findFirst({ where: { userId: user.id, movieId: movie.id } }),
+    // Most recent, not just any watch: for a rewatched movie, "completed
+    // on" should read as the last time it was actually finished.
+    prisma.movieWatch.findFirst({ where: { userId: user.id, movieId: movie.id }, orderBy: { watchedAt: "desc" } }),
     prisma.reaction.findFirst({ where: { userId: user.id, movieId: movie.id } }),
   ]);
 
@@ -77,6 +80,9 @@ export default async function MovieDetailPage({ params }: { params: { slug: stri
             />
             <AddToListButton movieId={movie.id} />
           </div>
+          {userMovie?.status === "COMPLETED" && watch && (
+            <p className="text-xs text-ink-faint mt-2">Completed {formatDate(watch.watchedAt)}</p>
+          )}
           {watch && (
             <div className="mt-4">
               <h2 className="text-sm font-semibold mb-2">Your reaction</h2>

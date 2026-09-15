@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { CheckCircleIcon } from "./icons";
+import { WatchDateEditor } from "./WatchDateEditor";
 
 export function EpisodeWatchToggle({
   episodeId,
@@ -19,19 +20,24 @@ export function EpisodeWatchToggle({
   const [watched, setWatched] = useState(initialWatched);
   const [showConfirm, setShowConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [justWatchedIds, setJustWatchedIds] = useState<string[] | null>(null);
   const [, startTransition] = useTransition();
 
   async function markIds(ids: string[]) {
     setBusy(true);
-    await Promise.all(ids.map((id) => fetch(`/api/episodes/${id}/watch`, { method: "POST" })));
+    const created = await Promise.all(
+      ids.map((id) => fetch(`/api/episodes/${id}/watch`, { method: "POST" }).then((r) => r.json()))
+    );
     setBusy(false);
     setWatched(true);
+    setJustWatchedIds(created.map((w) => w.id));
     startTransition(() => router.refresh());
   }
 
   async function toggle() {
     if (watched) {
       setWatched(false);
+      setJustWatchedIds(null);
       await fetch(`/api/episodes/${episodeId}/watch`, { method: "DELETE" });
       startTransition(() => router.refresh());
       return;
@@ -44,7 +50,9 @@ export function EpisodeWatchToggle({
   }
 
   async function rewatch() {
-    await fetch(`/api/episodes/${episodeId}/watch`, { method: "POST" });
+    const res = await fetch(`/api/episodes/${episodeId}/watch`, { method: "POST" });
+    const watch = await res.json();
+    setJustWatchedIds([watch.id]);
     startTransition(() => router.refresh());
   }
 
@@ -61,6 +69,7 @@ export function EpisodeWatchToggle({
         <CheckCircleIcon width={18} height={18} fill={watched ? "currentColor" : "none"} />
         {watched ? "Watched" : "Mark watched"}
       </button>
+      {watched && justWatchedIds && <WatchDateEditor kind="episode" watchIds={justWatchedIds} />}
       {watched && (
         <button onClick={rewatch} className="text-xs text-ink-muted hover:text-ink focus-ring rounded px-2 py-1">
           + Rewatch{rewatchCount > 1 ? ` (${rewatchCount})` : ""}

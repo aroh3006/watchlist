@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { WATCH_STATUSES, WATCH_STATUS_LABEL, type WatchStatus } from "@/lib/constants";
 import { StarIcon } from "./icons";
 import { RatingStars } from "./RatingStars";
+import { WatchDateEditor } from "./WatchDateEditor";
 
 export function ShowActions({
   showId,
@@ -27,17 +28,28 @@ export function ShowActions({
   const [saving, setSaving] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [removing, setRemoving] = useState(false);
+  const [justWatchId, setJustWatchId] = useState<string | null>(null);
 
   const statusEndpoint = kind === "show" ? `/api/shows/${showId}/status` : `/api/movies/${showId}/status`;
 
   async function updateStatus(next: string) {
     setSaving(true);
     setStatus(next);
-    await fetch(statusEndpoint, {
+    const res = await fetch(statusEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: next }),
     });
+    // Only movies record a watch event straight from the status picker
+    // (setMovieStatus does this on the COMPLETED transition), a show
+    // becomes COMPLETED from its episode watches instead, so there is
+    // never a movieWatchId here for kind "show".
+    if (kind === "movie" && next === "COMPLETED") {
+      const result = await res.json().catch(() => null);
+      if (result?.movieWatchId) setJustWatchId(result.movieWatchId);
+    } else {
+      setJustWatchId(null);
+    }
     setSaving(false);
     startTransition(() => router.refresh());
   }
@@ -117,6 +129,7 @@ export function ShowActions({
         ))}
         {kind === "movie" && <option value="NOT_WATCHED">Not Watched</option>}
       </select>
+      {status === "COMPLETED" && justWatchId && <WatchDateEditor kind="movie" watchIds={[justWatchId]} />}
 
       {confirmingRemove && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
