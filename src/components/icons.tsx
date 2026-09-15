@@ -119,3 +119,19 @@ export const SunIcon = (p: IconProps) =>
     p
   );
 export const MoonIcon = (p: IconProps) => base(<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" />, p);
+export const TrashIcon = (p: IconProps) =>
+  base(
+    <>
+      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+      <path d="M10 11v6M14 11v6" />
+    </>,
+    p
+  );
+export const PencilIcon = (p: IconProps) =>
+  base(
+    <>
+      <path d="M12.5 5.5 18.5 11.5 8 22H2v-6z" />
+      <path d="M16 3.5 20.5 8" />
+    </>,
+    p
+  );
