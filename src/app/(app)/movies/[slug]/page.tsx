@@ -8,6 +8,7 @@ import { ReactionBar } from "@/components/ReactionBar";
 import { PosterRow, PosterCard } from "@/components/PosterCard";
 import { SafeImage } from "@/components/SafeImage";
 import { Section } from "@/components/Section";
+import { WatchDateEditor } from "@/components/WatchDateEditor";
 import type { ReactionType } from "@/lib/constants";
 import { formatDate } from "@/lib/time";
 
@@ -81,7 +82,14 @@ export default async function MovieDetailPage({ params }: { params: { slug: stri
             <AddToListButton movieId={movie.id} />
           </div>
           {userMovie?.status === "COMPLETED" && watch && (
-            <p className="text-xs text-ink-faint mt-2">Completed {formatDate(watch.watchedAt)}</p>
+            <div className="mt-2">
+              <WatchDateEditor
+                kind="movie"
+                watchIds={[watch.id]}
+                currentDate={watch.watchedAt.toISOString().slice(0, 10)}
+                label={`Completed ${formatDate(watch.watchedAt)}`}
+              />
+            </div>
           )}
           {watch && (
             <div className="mt-4">

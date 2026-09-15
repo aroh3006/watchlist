@@ -10,6 +10,7 @@ import { EpisodeList, type SeasonData } from "@/components/EpisodeList";
 import { PosterRow, PosterCard } from "@/components/PosterCard";
 import { SafeImage } from "@/components/SafeImage";
 import { Section } from "@/components/Section";
+import { WatchDateEditor } from "@/components/WatchDateEditor";
 import { SHOW_STATUS_LABEL, type ShowStatus } from "@/lib/constants";
 import { formatDate } from "@/lib/time";
 
@@ -114,7 +115,14 @@ export default async function ShowDetailPage({ params }: { params: { slug: strin
             <AddToListButton showId={show.id} />
           </div>
           {userShow?.status === "COMPLETED" && mostRecentWatch && (
-            <p className="text-xs text-ink-faint mt-2">Completed {formatDate(mostRecentWatch.watchedAt)}</p>
+            <div className="mt-2">
+              <WatchDateEditor
+                kind="episode"
+                watchIds={[mostRecentWatch.id]}
+                currentDate={mostRecentWatch.watchedAt.toISOString().slice(0, 10)}
+                label={`Completed ${formatDate(mostRecentWatch.watchedAt)}`}
+              />
+            </div>
           )}
         </div>
       </div>

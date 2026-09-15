@@ -9,12 +9,13 @@ function todayDateString(): string {
 }
 
 /**
- * Lets a watch event that was just created (this page session) be logged
- * for a different day than today. Only ever targets the exact watch ids the
- * caller passes in, the ones just created by marking something watched, not
- * a general "edit any past watch" control. Nothing shows here for an item
- * that was already watched before this page loaded, that history is left
- * alone on purpose.
+ * Corrects the date on specific watch rows, identified by id. Two ways to
+ * reach it: right after marking something watched (an icon next to the new
+ * "Watched"/"Completed" state, watchIds coming from that action's own
+ * response), and persistently wherever a completion date is displayed
+ * (label + currentDate given, watchIds coming from a fresh page load). Both
+ * paths call the same PATCH endpoints and only ever target the exact ids
+ * passed in, this is not a browse-and-pick-any-watch control.
  *
  * Noon UTC is used as the picked date's time-of-day rather than midnight,
  * so converting it back to a calendar day in the user's own timezone never
@@ -24,9 +25,15 @@ function todayDateString(): string {
 export function WatchDateEditor({
   kind,
   watchIds,
+  currentDate,
+  label,
 }: {
   kind: "episode" | "movie";
   watchIds: string[];
+  /** yyyy-mm-dd the picker opens to. Defaults to today, e.g. right after marking something watched. */
+  currentDate?: string;
+  /** When given, this text is the clickable trigger (a persistent "Completed <date>" display) instead of a bare icon. */
+  label?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -56,22 +63,33 @@ export function WatchDateEditor({
   }
 
   return (
-    <span className="relative inline-flex items-center">
+    <span className="relative inline-flex items-center gap-1">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         disabled={saving}
-        aria-label="Set the date this was actually watched"
-        title="Set the date this was actually watched"
-        className="text-ink-faint hover:text-ink focus-ring rounded p-1 transition-colors disabled:opacity-60"
+        aria-label={label ? `${label}. Click to change the date.` : "Set the date this was actually watched"}
+        title="Change the watched date"
+        className={
+          label
+            ? "flex items-center gap-1 text-xs text-ink-faint hover:text-ink transition-colors focus-ring rounded disabled:opacity-60"
+            : "text-ink-faint hover:text-ink focus-ring rounded p-1 transition-colors disabled:opacity-60"
+        }
       >
-        <CalendarIcon width={15} height={15} />
+        {label ? (
+          <>
+            {label}
+            <CalendarIcon width={12} height={12} />
+          </>
+        ) : (
+          <CalendarIcon width={15} height={15} />
+        )}
       </button>
       {open && (
         <input
           type="date"
           autoFocus
-          defaultValue={today}
+          defaultValue={currentDate ?? today}
           max={today}
           disabled={saving}
           onChange={(e) => apply(e.target.value)}
