@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { PosterGrid, PosterCard } from "@/components/PosterCard";
 import { EmptyState } from "@/components/Section";
 import { DeleteListButton } from "@/components/DeleteListButton";
+import { ListItemsGrid, type ListItemData } from "@/components/ListItemsGrid";
 
 export default async function ListDetailPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -27,27 +27,17 @@ export default async function ListDetailPage({ params }: { params: { id: string 
       {list.items.length === 0 ? (
         <EmptyState title="This list is empty" body="Add shows or movies from their detail page." />
       ) : (
-        <PosterGrid>
-          {list.items.map((item) =>
-            item.show ? (
-              <PosterCard
-                key={item.id}
-                href={`/shows/${item.show.slug}`}
-                title={item.show.title}
-                posterUrl={item.show.posterUrl}
-                fixedWidth={false}
-              />
-            ) : item.movie ? (
-              <PosterCard
-                key={item.id}
-                href={`/movies/${item.movie.slug}`}
-                title={item.movie.title}
-                posterUrl={item.movie.posterUrl}
-                fixedWidth={false}
-              />
-            ) : null
-          )}
-        </PosterGrid>
+        <ListItemsGrid
+          items={list.items
+            .map((item): ListItemData | null =>
+              item.show
+                ? { id: item.id, href: `/shows/${item.show.slug}`, title: item.show.title, posterUrl: item.show.posterUrl }
+                : item.movie
+                  ? { id: item.id, href: `/movies/${item.movie.slug}`, title: item.movie.title, posterUrl: item.movie.posterUrl }
+                  : null
+            )
+            .filter((item): item is ListItemData => item !== null)}
+        />
       )}
     </div>
   );
